@@ -109,16 +109,6 @@ class TestServer(unittest.TestCase):
             load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
             get_r = requests.get(self.url + '/api/get/events?range=ALL&token=' + define_r.text)
             self.assertEqual(get_r.status_code, 200)
-            self.assertGreater(len(get_r.text), 10)
+            self.assertGreater(len(get_r.text), 5)
         else:
             self.fail("!! SERVER NOT FOUND !!")
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
