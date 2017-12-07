@@ -48,7 +48,7 @@ def define():
         srv.coordinator.process_template(srv.dstream)
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
-        logger.info("Server Error in define: Template loading/processing - {}".format(ex))
+        logger.warn("Server Error in define: Template loading/processing - {}".format(ex))
         return '{}'.format(ex), 400
     else:
         return str(srv.dstream['stream_token']), 200
@@ -77,7 +77,7 @@ def load():
         srv.coordinator.process_data_sync(json_data, token)
         logger.debug("load: coordinator.process_data_sync done")
     except Exception as ex:
-        logger.info("Server Error in load: Data loading/processing - {}".format(ex))
+        logger.warn("Server Error in load: Data loading/processing - {}".format(ex))
         return '{}'.format(ex), 400
     else:
         return 'Success.', 202
@@ -91,7 +91,7 @@ def load_kafka():
         srv.load_producer.produce(data)
         logger.debug("load_kafka: producer.produce done")
     except Exception as ex:
-        logger.info("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
+        logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
         return '{}'.format(ex), 400
     else:
         return 'Success.', 202
