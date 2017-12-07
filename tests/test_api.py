@@ -42,20 +42,20 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    def test_load(self): # TODO hit define and get actual stream_token back
+    def test_load(self):
         if self.server_up:
             df = open(self.dir + "demo_trip26.txt", 'r')
             data = df.read()
-            df.close()
             tf = open(self.dir + "demo_template.txt", 'r')
             tmpl = tf.read()
-            tf.close()
             ret = requests.post(self.url + '/api/define', data={'template': tmpl})
             json_data = json.loads(data)
             for obj in json_data:
                 obj['stream_token'] = ret.text
             json_dump = json.dumps(json_data)
             ret = requests.post(self.url + '/api/load', data={'data': json_dump})
+            df.close()
+            tf.close()
             self.assertEqual(ret.status_code, 202)
         else:
             self.fail("!! SERVER NOT FOUND !!")
@@ -93,9 +93,32 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    def test_get_events_all(self): # TODO get real events back
+    def test_get_events_all(self):
         if self.server_up:
-            ret = requests.get(self.url + '/api/get/events?range=ALL&token=abc123')
-            self.assertEqual(ret.status_code, 200)
+            tf = open(self.dir + "demo_template.txt", 'r')
+            tmpl = tf.read()
+            tf.close()
+            define_r = requests.post(self.url + '/api/define', data={'template': tmpl})
+            df = open(self.dir + "demo_trip26.txt", 'r')
+            data = df.read()
+            df.close()
+            json_data = json.loads(data)
+            for obj in json_data:
+                obj['stream_token'] = define_r.text
+            json_dump = json.dumps(json_data)
+            load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
+            get_r = requests.get(self.url + '/api/get/events?range=ALL&token=' + define_r.text)
+            self.assertEqual(get_r.status_code, 200)
+            self.assertGreater(len(get_r.text), 10)
         else:
             self.fail("!! SERVER NOT FOUND !!")
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
