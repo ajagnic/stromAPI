@@ -25,7 +25,7 @@ class Server():
             self.parser.add_argument(word)
 
     def _dstream_new(self):
-        self.dstream = DStream()
+        self.dstream = DStream() # NOTE TODO
 
     def parse(self):
         ret = self.parser.parse_args()
@@ -108,8 +108,11 @@ def get(this):
     print(time)
     print(time_range)
     if time_range:
+        logger.debug("get: got time_range")
         if time_range == 'ALL':
+            logger.debug("get: time_range is ALL")
             result = srv.coordinator.get_events(token)
+            logger.debug("get: coordinator.get_events done")
             return ("\n" + str(result) + "\n"), 200
         else:
             return '', 403

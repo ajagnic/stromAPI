@@ -13,7 +13,7 @@ class TestServer(unittest.TestCase):
             print(ex)
         else:
             self.server_up = True
-            print(ret.text + ' ' + str(ret.status_code))
+            print(ret.text)
 
     def test_define(self):
         if self.server_up:
@@ -42,15 +42,20 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    def test_load(self):
+    def test_load(self): # TODO hit define and get actual stream_token back
         if self.server_up:
             df = open(self.dir + "demo_trip26.txt", 'r')
             data = df.read()
             df.close()
+            tf = open(self.dir + "demo_template.txt", 'r')
+            tmpl = tf.read()
+            tf.close()
+            ret = requests.post(self.url + '/api/define', data={'template': tmpl})
             json_data = json.loads(data)
             for obj in json_data:
-                obj['stream_token'] = #TODO
-            ret = requests.post(self.url + '/api/load', data={'data': data})
+                obj['stream_token'] = ret.text
+            json_dump = json.dumps(json_data)
+            ret = requests.post(self.url + '/api/load', data={'data': json_dump})
             self.assertEqual(ret.status_code, 202)
         else:
             self.fail("!! SERVER NOT FOUND !!")
@@ -69,5 +74,28 @@ class TestServer(unittest.TestCase):
         if self.server_up:
             ret = requests.get(self.url + '/api/load')
             self.assertEqual(ret.status_code, 405)
+        else:
+            self.fail("!! SERVER NOT FOUND !!")
+
+    def test_load_kafka(self):
+        if self.server_up:
+            msg = "Hello !%&^!"
+            data = msg.encode()
+            ret = requests.post(self.url + '/kafka/load', data={'stream_data': data})
+            self.assertEqual(ret.status_code, 202)
+        else:
+            self.fail("!! SERVER NOT FOUND !!")
+
+    def test_load_kafka_get_fail(self):
+        if self.server_up:
+            ret = requests.get(self.url + '/kafka/load')
+            self.assertEqual(ret.status_code, 405)
+        else:
+            self.fail("!! SERVER NOT FOUND !!")
+
+    def test_get_events_all(self): # TODO get real events back
+        if self.server_up:
+            ret = requests.get(self.url + '/api/get/events?range=ALL&token=abc123')
+            self.assertEqual(ret.status_code, 200)
         else:
             self.fail("!! SERVER NOT FOUND !!")
