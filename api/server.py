@@ -34,6 +34,7 @@ class Server():
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 app = Flask(__name__.split('.')[0])
+socketio = SocketIO(app)
 srv = Server()
 
 def define():
@@ -118,6 +119,13 @@ def get(this):
         else:
             return '', 403
 
+# Flask-SocketIO
+@socketio.on('event_detected')
+def handle_event_detection(json):
+    # send event data to the client (which is also listening for the 'event_detected' event)
+    # when data is loaded to kafka, we send the events detected to the client
+    emit('event_detected', json)
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
@@ -129,13 +137,6 @@ app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
-
-# Flask-SocketIO
-@socketio.on('event_detected')
-def handle_event_detection(json):
-    # send event data to the client (which is also listening for the 'event_detected' event)
-    # when data is loaded to kafka, we send the events detected to the client
-    emit('event_detected', json)
 
 def start():
     """ Entry-point """
