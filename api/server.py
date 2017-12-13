@@ -1,6 +1,6 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask_restful import reqparse
 from strom.dstream.dstream import DStream
 from strom.coordinator.coordinator import Coordinator
@@ -51,7 +51,9 @@ def define():
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
         return '{}'.format(ex), 400
     else:
-        return str(srv.dstream['stream_token']), 200
+        resp = Response(str(srv.dstream['stream_token']), 200)
+        resp.headers['Access-Control-Allow-Origin']='*'
+        return resp
 
 def add_source(): #NOTE TODO
     """ Collect data source and set in DStream field """
@@ -97,7 +99,9 @@ def load_kafka():
         return 'Success.', 202
 
 def index():
-    return 'STROM-API is UP', 200
+    resp = Response('STROM-API is UP', 200)
+    resp.headers['Access-Control-Allow-Origin']='*'
+    return resp
 
 def get(this):
     """ Returns data, specified by endpoint & URL params. """
@@ -127,6 +131,7 @@ app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
+# TEMP
 
 def start():
     """ Entry-point """
