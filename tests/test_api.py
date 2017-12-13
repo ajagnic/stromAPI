@@ -1,6 +1,7 @@
 import unittest
 import requests
 import json
+from flask_socketio import SocketIOTestClient
 
 class TestServer(unittest.TestCase):
     def setUp(self):
@@ -110,5 +111,28 @@ class TestServer(unittest.TestCase):
             get_r = requests.get(self.url + '/api/get/events?range=ALL&token=' + define_r.text)
             self.assertEqual(get_r.status_code, 200)
             self.assertGreater(len(get_r.text), 5)
+        else:
+            self.fail("!! SERVER NOT FOUND !!")
+
+    def test_handle_event_detection(self):
+        self.fake_client = SocketIOTestClient()
+        if self.server_up:
+
+            tf = open(self.dir + "demo_template.txt", 'r')
+            tmpl = tf.read()
+            tf.close()
+            define_r = requests.post(self.url + '/api/define', data={'template': tmpl})
+            df = open(self.dir + "demo_trip26.txt", 'r')
+            data = df.read()
+            df.close()
+            json_data = json.loads(data)
+            for obj in json_data:
+                obj['stream_token'] = define_r.text
+            json_dump = json.dumps(json_data)
+            load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
+            get_r = requests.get(self.url + '/events')
+
+            self.assertEqual(get_r, self.fake_client.get_received())
+            self.assertEqual(get_r.status_code, 200)
         else:
             self.fail("!! SERVER NOT FOUND !!")

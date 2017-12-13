@@ -2,6 +2,7 @@
 import json
 from flask import Flask, request
 from flask_restful import reqparse
+from flask_socketio import SocketIO, emit, send
 from strom.dstream.dstream import DStream
 from strom.coordinator.coordinator import Coordinator
 from strom.kafka.producer.producer import Producer
@@ -121,6 +122,7 @@ def get(this):
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
+app.add_url_rule('/events', 'new_event', handle_event_detection, methods=['POST'])
 # KAFKA POST
 app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
@@ -128,8 +130,15 @@ app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 
+# Flask-SocketIO
+@socketio.on('event_detected')
+def handle_event_detection(json):
+    # send event data to the client (which is also listening for the 'event_detected' event)
+    # when data is loaded to kafka, we send the events detected to the client
+    emit('event_detected', json)
+
 def start():
     """ Entry-point """
-    app.run()
+    socketio.run(app)
 if __name__ == '__main__':
     start()
