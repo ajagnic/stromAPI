@@ -49,7 +49,9 @@ def define():
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
-        return '{}'.format(ex), 400
+        bad_resp = Response(ex, 400)
+        bad_resp.headers['Access-Control-Allow-Origin']='*'
+        return bad_resp
     else:
         resp = Response(str(srv.dstream['stream_token']), 200)
         resp.headers['Access-Control-Allow-Origin']='*'
@@ -94,9 +96,13 @@ def load_kafka():
         logger.debug("load_kafka: producer.produce done")
     except Exception as ex:
         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
-        return '{}'.format(ex), 400
+        bad_resp = Response(ex, 400)
+        bad_resp.headers['Access-Control-Allow-Origin']='*'
+        return bad_resp
     else:
-        return 'Success.', 202
+        resp = Response('Success.', 202)
+        resp.headers['Access-Control-Allow-Origin']='*'
+        return resp
 
 def index():
     resp = Response('STROM-API is UP', 200)
@@ -131,7 +137,6 @@ app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
-# TEMP
 
 def start():
     """ Entry-point """
