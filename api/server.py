@@ -20,6 +20,7 @@ class Server():
         self.coordinator = Coordinator()
         self.kafka_url = '127.0.0.1:9092'
         self.load_producer = Producer(self.kafka_url, b'load')
+        self.producers = {}
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
@@ -27,6 +28,9 @@ class Server():
     def _dstream_new(self):
         dstream = DStream() # NOTE TODO
         return dstream
+
+    def producer_new(self, topic):
+        self.producers[topic] = Producer(self.kafka_url, topic.encode())
 
     def parse(self):
         ret = self.parser.parse_args()
@@ -48,6 +52,7 @@ def define():
         cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
         srv.coordinator.process_template(cur_dstream)
+        srv.producer_new(cur_dstream["engine_rules"]["kafka"])
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
@@ -94,7 +99,10 @@ def load_kafka():
     try:
         data = args['stream_data'].encode()
         logger.debug("load_kafka: encode stream_data done")
-        srv.load_producer.produce(data)
+        kafka_topic = args['topic']
+        logger.debug("load_kafka: encode topic done")
+        # srv.load_producer.produce(data)
+        srv.producers[kafka_topic].produce(data)
         logger.debug("load_kafka: producer.produce done")
     except Exception as ex:
         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
