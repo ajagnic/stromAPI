@@ -25,7 +25,8 @@ class Server():
             self.parser.add_argument(word)
 
     def _dstream_new(self):
-        self.dstream = DStream() # NOTE TODO
+        dstream = DStream() # NOTE TODO
+        return dstream
 
     def parse(self):
         ret = self.parser.parse_args()
@@ -39,13 +40,14 @@ def define():
     """ Collect template for DStream init and return stream_token. """
     args = srv.parse()
     template = args['template'] #   dstream template
-    srv._dstream_new()
+    cur_dstream = srv._dstream_new()
+    logger.info("stream token is: {}".format(str(cur_dstream['stream_token'])))
     try:
         json_template = json.loads(template)
         logger.debug("define: json.loads done")
-        srv.dstream.load_from_json(json_template)
+        cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
-        srv.coordinator.process_template(srv.dstream)
+        srv.coordinator.process_template(cur_dstream)
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
@@ -53,7 +55,7 @@ def define():
         bad_resp.headers['Access-Control-Allow-Origin']='*'
         return bad_resp
     else:
-        resp = Response(str(srv.dstream['stream_token']), 200)
+        resp = Response(str(cur_dstream['stream_token']), 200)
         resp.headers['Access-Control-Allow-Origin']='*'
         return resp
 
