@@ -1,6 +1,6 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response, jsonify
 from flask_restful import reqparse
 from flask_socketio import SocketIO, emit, send
 from strom.dstream.dstream import DStream
@@ -26,7 +26,8 @@ class Server():
             self.parser.add_argument(word)
 
     def _dstream_new(self):
-        self.dstream = DStream() # NOTE TODO
+        dstream = DStream() # NOTE TODO
+        return dstream
 
     def parse(self):
         ret = self.parser.parse_args()
@@ -41,19 +42,24 @@ def define():
     """ Collect template for DStream init and return stream_token. """
     args = srv.parse()
     template = args['template'] #   dstream template
-    srv._dstream_new()
+    cur_dstream = srv._dstream_new()
+    logger.info("stream token is: {}".format(str(cur_dstream['stream_token'])))
     try:
         json_template = json.loads(template)
         logger.debug("define: json.loads done")
-        srv.dstream.load_from_json(json_template)
+        cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
-        srv.coordinator.process_template(srv.dstream)
+        srv.coordinator.process_template(cur_dstream)
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
-        return '{}'.format(ex), 400
+        bad_resp = Response(ex, 400)
+        bad_resp.headers['Access-Control-Allow-Origin']='*'
+        return bad_resp
     else:
-        return str(srv.dstream['stream_token']), 200
+        resp = Response(str(cur_dstream['stream_token']), 200)
+        resp.headers['Access-Control-Allow-Origin']='*'
+        return resp
 
 def add_source(): #NOTE TODO
     """ Collect data source and set in DStream field """
@@ -94,12 +100,18 @@ def load_kafka():
         logger.debug("load_kafka: producer.produce done")
     except Exception as ex:
         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
-        return '{}'.format(ex), 400
+        bad_resp = Response(ex, 400)
+        bad_resp.headers['Access-Control-Allow-Origin']='*'
+        return bad_resp
     else:
-        return 'Success.', 202
+        resp = Response('Success.', 202)
+        resp.headers['Access-Control-Allow-Origin']='*'
+        return resp
 
 def index():
-    return 'STROM-API is UP', 200
+    resp = Response('STROM-API is UP', 200)
+    resp.headers['Access-Control-Allow-Origin']='*'
+    return resp
 
 def get(this):
     """ Returns data, specified by endpoint & URL params. """
