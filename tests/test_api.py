@@ -2,6 +2,8 @@ import unittest
 import requests
 import json
 from flask_socketio import SocketIOTestClient
+from ..api.server import app, socketio
+from strom.utils.configer import configer as config
 
 class TestServer(unittest.TestCase):
     def setUp(self):
@@ -115,22 +117,26 @@ class TestServer(unittest.TestCase):
             self.fail("!! SERVER NOT FOUND !!")
 
     def test_handle_event_detection(self):
-        self.fake_client = SocketIOTestClient()
-        if self.server_up:
+        def _post_events(events):
+           endpoint = 'http://{}:{}/events'.format(config['server_host'], config['server_port'])
+           r = requests.post(endpoint, json=events)
+           return 'request status: ' + str(r.status_code)
 
-            tf = open(self.dir + "demo_template.txt", 'r')
-            tmpl = tf.read()
-            tf.close()
-            define_r = requests.post(self.url + '/api/define', data={'template': tmpl})
-            df = open(self.dir + "demo_trip26.txt", 'r')
-            data = df.read()
-            df.close()
-            json_data = json.loads(data)
-            for obj in json_data:
-                obj['stream_token'] = define_r.text
-            json_dump = json.dumps(json_data)
-            load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
-            get_r = requests.get(self.url + '/events')
+        self.fake_client = SocketIOTestClient(app, socketio)
+        if self.server_up:
+            dummy_data = {"key": "why is this not working?"}
+            dumped = json.dumps(dummy_data)
+            bstream = json.load(open(self.dir + "events.json"))
+            # process_data_sync will eventually run the code below, but for now,
+            # we have to call it ourselves
+            # tf = open(self.dir + "events.json")
+            # tmpl = tf.read()
+            # tf.close()
+
+            # get_r = _post_events(bstream)
+            get_r = _post_events(dumped)
+
+            # get events from the /events endpoint
 
             self.assertEqual(get_r, self.fake_client.get_received())
             self.assertEqual(get_r.status_code, 200)

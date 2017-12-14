@@ -1,6 +1,6 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import reqparse
 from flask_socketio import SocketIO, emit, send
 from strom.dstream.dstream import DStream
@@ -15,7 +15,7 @@ __author__ = 'Adrian Agnic <adrian@tura.io>'
 class Server():
     def __init__(self):
         self.expected_args = [
-        'template', 'data', 'source', 'topic', 'token', 'stream_data', 'stream_template'
+        'template', 'data', 'source', 'topic', 'token', 'stream_data', 'stream_template', 'key'
         ]
         self.parser = reqparse.RequestParser()
         self.coordinator = Coordinator()
@@ -120,17 +120,23 @@ def get(this):
             return '', 403
 
 # Flask-SocketIO
-@socketio.on('event_detected')
-def handle_event_detection(json):
+# @socketio.on('event_detected', namespace='/events')
+def handle_event_detection():
     # send event data to the client (which is also listening for the 'event_detected' event)
     # when data is loaded to kafka, we send the events detected to the client
-    emit('event_detected', json)
+    # emit('event_detected', json)
+    args = srv.parse()
+    data = args['key']
+    json_data = json.loads(data)
+    print('~~~DATA~~~', json_data)
+    print('~~~request~~~', request.json)
+    return json_data
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
-app.add_url_rule('/events', 'new_event', handle_event_detection, methods=['POST'])
+app.add_url_rule('/events', 'handle_event_detection', handle_event_detection, methods=['POST'])
 # KAFKA POST
 app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
@@ -140,6 +146,7 @@ app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 
 def start():
     """ Entry-point """
-    socketio.run(app)
+    app.run()
+    # socketio.run(app)
 if __name__ == '__main__':
     start()
