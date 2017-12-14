@@ -120,17 +120,16 @@ def get(this):
             return '', 403
 
 # Flask-SocketIO
-# @socketio.on('event_detected', namespace='/events')
+@socketio.on('event_detected')
 def handle_event_detection():
     # send event data to the client (which is also listening for the 'event_detected' event)
     # when data is loaded to kafka, we send the events detected to the client
     # emit('event_detected', json)
-    args = srv.parse()
-    data = args['key']
-    json_data = json.loads(data)
-    print('~~~DATA~~~', json_data)
-    print('~~~request~~~', request.json)
-    return json_data
+    # args = srv.parse()
+    # data = args['key']
+    json_data = request.get_json()
+    # json_data = json.loads(data)
+    return jsonify(json_data), 200
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
@@ -146,7 +145,7 @@ app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 
 def start():
     """ Entry-point """
-    app.run()
-    # socketio.run(app)
+    # app.run()
+    socketio.run(app)
 if __name__ == '__main__':
     start()
