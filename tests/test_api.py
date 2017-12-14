@@ -117,10 +117,10 @@ class TestServer(unittest.TestCase):
             self.fail("!! SERVER NOT FOUND !!")
 
     def test_handle_event_detection(self):
-        def _post_events(events):
-           endpoint = 'http://{}:{}/events'.format(config['server_host'], config['server_port'])
+        def post_events(events):
+           endpoint = 'http://{}:{}/new_event'.format(config['server_host'], config['server_port'])
            r = requests.post(endpoint, json=events)
-           return 'request status: ' + str(r.status_code)
+           return r
 
         self.fake_client = SocketIOTestClient(app, socketio)
         if self.server_up:
@@ -134,11 +134,12 @@ class TestServer(unittest.TestCase):
             # tf.close()
 
             # get_r = _post_events(bstream)
-            get_r = _post_events(dumped)
+            get_r = post_events(dumped)
+            #self.assertEqual(get_r, dumped)
 
             # get events from the /events endpoint
+            print(get_r)
 
-            self.assertEqual(get_r, self.fake_client.get_received())
-            self.assertEqual(get_r.status_code, 200)
+            self.assertEqual(dumped, self.fake_client.get_received())
         else:
             self.fail("!! SERVER NOT FOUND !!")
