@@ -1,6 +1,6 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, render_template
 from flask_restful import reqparse
 from flask_socketio import SocketIO, emit, send
 from strom.dstream.dstream import DStream
@@ -131,16 +131,43 @@ def get(this):
         else:
             return '', 403
 
-def handle_event_detection():
-    # send event data to the client (which is also listening for the 'event_detected' event)
-    # when data is loaded to kafka, we send the events detected to the client
+# Flask-SocketIO handler and visual check
 
-    # args = srv.parse()
-    # data = args['key']
+# spin up a webpage
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# def background_thread():
+#     while True:
+#         socketio.emit('message', {'goodbye': "Goodbye"})
+#         time.sleep(5)
+
+# @socketio.on('connect')
+# def connect():
+#     # global thread
+#     # if thread is None:
+#     #     thread = socketio.start_background_task(target=background_thread)
+#     send("{'hi': 'hello!' }")
+#     handle_event_detection({"trying": "really trying" })
+
+# @socketio.on('event_detected')
+def handle_event_detection():
     json_data = request.get_json()
+    print('json_data', json_data)
+    # @socketio.on('connect')
+    # def connect():
+        # global thread
+        # if thread is None:
+        #     thread = socketio.start_background_task(target=background_thread)
+        # send("{'hi': 'hello!' }")
+        # send(json_data)
+        # handle_event_detection({"trying": "really trying" })
+    # print('json_data', json_data)
     # send_event(json_data)
-    socketio.emit(json_data)
+    socketio.send(json_data)
     # json_data = json.loads(data)
+    # socketio.emit('event_detected', json)
     return jsonify(json_data)
 
 # POST
