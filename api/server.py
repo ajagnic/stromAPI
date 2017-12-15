@@ -38,8 +38,6 @@ class Server():
 
 app = Flask(__name__.split('.')[0])
 socketio = SocketIO(app)
-socketio.check_msg = False
-socketio.index_path = ''
 srv = Server()
 
 def define():
@@ -135,52 +133,9 @@ def get(this):
         else:
             return '', 403
 
-# Flask-SocketIO handler and visual check
-
-# spin up a webpage
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-# def background_thread():
-#     while True:
-#         socketio.emit('message', {'goodbye': "Goodbye"})
-#         time.sleep(5)
-
-# @socketio.on('connect')
-# def connect():
-#     # global thread
-#     # if thread is None:
-#     #     thread = socketio.start_background_task(target=background_thread)
-#     send("{'hi': 'hello!' }")
-#     handle_event_detection({"trying": "really trying" })
-
-
-
-app.check = False
-
-@socketio.on('message')
-def handle_client_message(json):
-    socketio.check_msg = True
-    print('###____#### Handle Client Message {0}'.format(json))
-    #messages.append('WOOOOO')
-
 def handle_event_detection():
     json_data = request.get_json()
-    print('json_data', json_data)
-    # @socketio.on('connect')
-    # def connect():
-        # global thread
-        # if thread is None:
-        #     thread = socketio.start_background_task(target=background_thread)
-        # send("{'hi': 'hello!' }")
-        # send(json_data)
-        # handle_event_detection({"trying": "really trying" })
-    # print('json_data', json_data)
-    # send_event(json_data)
     socketio.send(json_data)
-    # json_data = json.loads(data)
-    # socketio.emit('event_detected', json)
     return jsonify(json_data)
 
 # POST
@@ -199,7 +154,6 @@ app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 
 def start():
     """ Entry-point """
-    # app.run()
     socketio.run(app)
 if __name__ == '__main__':
     start()

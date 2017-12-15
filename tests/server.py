@@ -136,24 +136,10 @@ def get(this):
             return '', 403
 
 # Flask-SocketIO handler and visual check
-
 # spin up a webpage
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# def background_thread():
-#     while True:
-#         socketio.emit('message', {'goodbye': "Goodbye"})
-#         time.sleep(5)
-
-# @socketio.on('connect')
-# def connect():
-#     # global thread
-#     # if thread is None:
-#     #     thread = socketio.start_background_task(target=background_thread)
-#     send("{'hi': 'hello!' }")
-#     handle_event_detection({"trying": "really trying" })
 
 app.check = False
 
