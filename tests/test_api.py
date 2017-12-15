@@ -1,23 +1,26 @@
 import unittest
 import requests
-import json
-
-from flask_socketio import SocketIOTestClient
-from ..api.server import srv,app
+import time
+from threading import Thread
+from .server import app, socketio
 from strom.utils.configer import configer as config
 
 class TestServer(unittest.TestCase):
     def setUp(self):
         self.dir = "demo_data/"
         self.url = "http://127.0.0.1:5000"
-        self.server_up = False
-        try:
-            ret = requests.get(self.url)
-        except Exception as ex:
-            print(ex)
-        else:
-            self.server_up = True
-            print(ret.text)
+
+    class ServerThread(Thread):
+        def __init__(self):
+            super().__init__()
+            self.app = app
+            self.sock = socketio
+
+        def run(self):
+            self.sock.run(self.app)
+
+    server = ServerThread()
+
 
     # def test_define(self):
     #     if self.server_up:
@@ -118,33 +121,32 @@ class TestServer(unittest.TestCase):
     #         self.fail("!! SERVER NOT FOUND !!")
 
     def test_handle_event_detection(self):
-        messages = []
-
         def post_events(events):
            endpoint = 'http://{}:{}/new_event'.format(config['server_host'], config['server_port'])
            r = requests.post(endpoint, json=events)
            return r
 
-        #self.fake_client = SocketIOTestClient(app, socketio)
 
-        if self.server_up:
-            dummy_data = {"key": "why is this not working?"}
-            dumped = json.dumps(dummy_data)
-            # bstream = json.load(open(self.dir + "events.json"))
-            # process_data_sync will eventually run the code below, but for now,
-            # we have to call it ourselves
-            # tf = open(self.dir + "events.json")
-            # tmpl = tf.read()
-            # tf.close()
+        # bstream = json.load(open(self.dir + "events.json"))
+        # process_data_sync will eventually run the code below, but for now,
+        # we have to call it ourselves
+        # tf = open(self.dir + "events.json")
+        # tmpl = tf.read()
+        # tf.close()
 
-            # get_r = _post_events(bstream)
-            get_r = post_events(dumped)
-            #self.assertEqual(get_r, dumped)
+        self.server.start()
 
-            # get events from the /events endpoint
-            print(get_r)
+        dummy_data = {"key": "why is this not working?"}
+        #dumped = json.dumps(dummy_data)
+        time.sleep(5)
+        post_events(dummy_data)
+        time.sleep(5)
 
-            # Test from the server side that the socket responds
-            self.assertTrue(srv._socket_verification)
-        else:
-            self.fail("!! SERVER NOT FOUND !!")
+
+        #self.assertEqual(get_r, dumped)
+
+        # get events from the /events endpoint
+        #print(get_r)
+
+        # Test from the server side that the socket responds
+        self.assertTrue(self.server.sock.check_msg)

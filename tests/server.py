@@ -36,7 +36,7 @@ class Server():
         return ret
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-app = Flask(__name__.split('.')[0])
+app = Flask(__name__)
 socketio = SocketIO(app)
 socketio.check_msg = False
 socketio.index_path = ''
@@ -155,32 +155,22 @@ def index():
 #     send("{'hi': 'hello!' }")
 #     handle_event_detection({"trying": "really trying" })
 
-
-
 app.check = False
 
 @socketio.on('message')
 def handle_client_message(json):
+    print(socketio.check_msg)
     socketio.check_msg = True
     print('###____#### Handle Client Message {0}'.format(json))
+    print('socket check ', socketio.check_msg)
     #messages.append('WOOOOO')
 
 def handle_event_detection():
     json_data = request.get_json()
     print('json_data', json_data)
-    # @socketio.on('connect')
-    # def connect():
-        # global thread
-        # if thread is None:
-        #     thread = socketio.start_background_task(target=background_thread)
-        # send("{'hi': 'hello!' }")
-        # send(json_data)
-        # handle_event_detection({"trying": "really trying" })
-    # print('json_data', json_data)
-    # send_event(json_data)
+
     socketio.send(json_data)
-    # json_data = json.loads(data)
-    # socketio.emit('event_detected', json)
+
     return jsonify(json_data)
 
 # POST
