@@ -30,7 +30,7 @@ class TestServer(unittest.TestCase):
             ef = open(self.dir + "empty.txt", 'r')
             empty = ef.read()
             ef.close()
-            ret = requests.post(self.url + '/api/define', data={'template': empty})
+            ret = requests.post(self.url + '/api/define', data={'template': {'this': 'is wrong'}})
             self.assertEqual(ret.status_code, 400)
         else:
             self.fail("!! SERVER NOT FOUND !!")
@@ -81,7 +81,7 @@ class TestServer(unittest.TestCase):
         if self.server_up:
             msg = "Hello !%&^!"
             data = msg.encode()
-            ret = requests.post(self.url + '/kafka/load', data={'stream_data': data})
+            ret = requests.post(self.url + '/kafka/load', data={'stream_data': data, 'topic': 'test'})
             self.assertEqual(ret.status_code, 202)
         else:
             self.fail("!! SERVER NOT FOUND !!")
@@ -109,6 +109,6 @@ class TestServer(unittest.TestCase):
             load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
             get_r = requests.get(self.url + '/api/get/events?range=ALL&token=' + define_r.text)
             self.assertEqual(get_r.status_code, 200)
-            self.assertGreater(len(get_r.text), 5)
+            self.assertGreater(len(get_r.text), 3)
         else:
             self.fail("!! SERVER NOT FOUND !!")
