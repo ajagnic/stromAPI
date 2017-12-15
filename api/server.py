@@ -60,9 +60,10 @@ def define():
         logger.debug("define: coordinator.process-template done")
     except Exception as ex:
         logger.warning("Server Error in define: Template loading/processing - {}".format(ex))
-        bad_resp = Response(ex, 400)
-        bad_resp.headers['Access-Control-Allow-Origin']='*'
-        return bad_resp
+        # bad_resp = Response(ex, 400)
+        # bad_resp.headers['Access-Control-Allow-Origin']='*'
+        # return bad_resp
+        return '{}'.format(ex), 400
     else:
         resp = Response(str(cur_dstream['stream_token']), 200)
         resp.headers['Access-Control-Allow-Origin']='*'
@@ -110,9 +111,10 @@ def load_kafka():
         logger.debug("load_kafka: producer.produce done")
     except Exception as ex:
         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
-        bad_resp = Response(ex, 400)
-        bad_resp.headers['Access-Control-Allow-Origin']='*'
-        return bad_resp
+        # bad_resp = Response(ex, 400)
+        # bad_resp.headers['Access-Control-Allow-Origin']='*'
+        # return bad_resp
+        return '{}'.format(ex), 400
     else:
         resp = Response('Success.', 202)
         resp.headers['Access-Control-Allow-Origin']='*'
