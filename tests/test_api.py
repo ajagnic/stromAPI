@@ -1,10 +1,10 @@
 import unittest
 import requests
 import json
+
 from flask_socketio import SocketIOTestClient
-from ..api.server import app, socketio
+from ..api.server import srv,app
 from strom.utils.configer import configer as config
-app.run()
 
 class TestServer(unittest.TestCase):
     def setUp(self):
@@ -125,10 +125,8 @@ class TestServer(unittest.TestCase):
            r = requests.post(endpoint, json=events)
            return r
 
-        self.fake_client = SocketIOTestClient(app, socketio)
-        @socketio.on('message')
-        def handle_client_message():
-            messages.append('WOOOOO')
+        #self.fake_client = SocketIOTestClient(app, socketio)
+
         if self.server_up:
             dummy_data = {"key": "why is this not working?"}
             dumped = json.dumps(dummy_data)
@@ -146,6 +144,7 @@ class TestServer(unittest.TestCase):
             # get events from the /events endpoint
             print(get_r)
 
-            self.assertEqual(1, len(messages))
+            # Test from the server side that the socket responds
+            self.assertTrue(srv._socket_verification)
         else:
             self.fail("!! SERVER NOT FOUND !!")

@@ -7,7 +7,7 @@ socket.on('connect', function() {
 
 socket.on('message', function (data) {
     console.log('message from backend ' + data);
-    socket.send('WOOOOO')
+    socket.send('{"message": "WWOOOO"}');
 });
 
 socket.on('alert', function (data) {

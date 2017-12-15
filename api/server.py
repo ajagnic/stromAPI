@@ -24,6 +24,8 @@ class Server():
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
+        # ToDo socket verification for unittest only, remove later
+        self._socket_verification = False
 
     def _dstream_new(self):
         dstream = DStream() # NOTE TODO
@@ -151,7 +153,13 @@ def index():
 #     send("{'hi': 'hello!' }")
 #     handle_event_detection({"trying": "really trying" })
 
-# @socketio.on('event_detected')
+
+@socketio.on('message')
+def handle_client_message(json):
+    srv._socket_verification = True
+    print('###____#### Handle Client Message {0}'.format(json))
+    #messages.append('WOOOOO')
+
 def handle_event_detection():
     json_data = request.get_json()
     print('json_data', json_data)
