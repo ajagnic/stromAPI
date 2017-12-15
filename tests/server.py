@@ -1,5 +1,6 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
+import os
 from flask import Flask, request, Response, jsonify, render_template
 from flask_restful import reqparse
 from flask_socketio import SocketIO, emit, send
@@ -145,11 +146,9 @@ app.check = False
 
 @socketio.on('message')
 def handle_client_message(json):
-    print(socketio.check_msg)
     socketio.check_msg = True
     print('###____#### Handle Client Message {0}'.format(json))
     print('socket check ', socketio.check_msg)
-    #messages.append('WOOOOO')
 
 def handle_event_detection():
     json_data = request.get_json()
@@ -158,6 +157,9 @@ def handle_event_detection():
     socketio.send(json_data)
 
     return jsonify(json_data)
+
+def terminate():
+    socketio.stop()
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
@@ -170,6 +172,8 @@ app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
+# TERMINATE APP.RUN
+app.add_url_rule('/terminate', 'terminate', terminate, methods=['GET'])
 
 
 
