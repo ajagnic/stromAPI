@@ -10,6 +10,16 @@ socket.on('message', function (data) {
     socket.send('{"message": "WWOOOO"}');
 });
 
+socket.on('lucy_on_couch_kody', function (data) {
+    console.log(data);
+    socket.send('lucy_on_couch_kody: ' + data);
+})
+
+socket.on('lucky_napping_coding', function (data) {
+    console.log(data);
+    socket.send('lucy_on_couch_kody: ' + data);
+})
+
 socket.on('alert', function (data) {
     alert('Alert Message!! ' + data);
 });

@@ -150,16 +150,31 @@ def handle_client_message(json):
     print('###____#### Handle Client Message {0}'.format(json))
     print('socket check ', socketio.check_msg)
 
+@socketio.on('lucy_on_couch_kody')
+def handle_client_message(data):
+    socketio.check_msg = True
+    print('LUCY IS ON THE COUCH OH MY GOD!!'.format(data))
+    print('socket check ', socketio.check_msg)
+
 def handle_event_detection():
     json_data = request.get_json()
-    print('json_data', json_data)
-
-    socketio.send(json_data)
+    if json_data is not None:
+        if "event" in json_data:
+            if "data" in json_data:
+                socketio.emit(json_data["event"], json_data["data"])
+            else:
+                raise ValueError('Missing event data field: data')
+        else:
+            raise ValueError('Missing event name field: event')
+    else:
+        raise RuntimeError("No event data to return")
 
     return jsonify(json_data)
 
 def terminate():
     socketio.stop()
+
+    return "Server terminated"
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])

@@ -3,6 +3,7 @@ import requests
 import time
 from threading import Thread
 from .server import app, socketio
+from strom.coordinator.coordinator import Coordinator
 from strom.utils.configer import configer as config
 
 
@@ -26,22 +27,30 @@ def terminate_server():
    return r
 
 
-class TestServer(unittest.TestCase):
+class TestServerSocket(unittest.TestCase):
     def setUp(self):
         self.dir = "demo_data/"
         self.url = "http://127.0.0.1:5000"
         self.server = ServerThread()
+        self.coordinator = Coordinator()
+        self.dum = {"engine_rules": {"kafka": "kody"}, "events": {"lucy_on_couch": ["yikes", "getoverhere", "notreats"]}, "lucky_napping": ["awww", "sleepy", "sleepwoof"]}
+        self.dummy = {"event": "lucy_on_couch_kody", "data": ["yikes", "getoverhere", "notreats"]}
 
     def test_handle_event_detection(self):
 
 
         self.server.start()
 
-        dummy_data = {"key": "why is this not working?"}
+        #
         time.sleep(5)
-        post_events(dummy_data)
+        r = self.coordinator._post_events(self.dummy)
+        print("post return", r)
         time.sleep(5)
 
         self.assertTrue(self.server.sock.check_msg)
         terminate_server()
+
+    def test_test_parse(self):
+        result = self.coordinator._parse_events(self.dum)
+        self.assertIn({"event": "lucy_on_couch_kody", "data": ["yikes", "getoverhere", "notreats"]}, result)
 

@@ -15,7 +15,7 @@ __author__ = 'Adrian Agnic <adrian@tura.io>'
 class Server():
     def __init__(self):
         self.expected_args = [
-        'template', 'data', 'source', 'topic', 'token', 'stream_data', 'stream_template', 'key'
+        'template', 'data', 'source', 'topic', 'token', 'stream_data', 'stream_template'
         ]
         self.parser = reqparse.RequestParser()
         self.coordinator = Coordinator()
@@ -25,8 +25,6 @@ class Server():
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
-        # ToDo socket verification for unittest only, remove later
-        self._socket_verification = False
 
     def _dstream_new(self):
         dstream = DStream() # NOTE TODO
@@ -145,7 +143,17 @@ def get(this):
 
 def handle_event_detection():
     json_data = request.get_json()
-    socketio.send(json_data)
+    if json_data is not None:
+        if "event" in json_data:
+            if "data" in json_data:
+                socketio.emit(json_data["event"], json_data["data"])
+            else:
+                raise ValueError('Missing event data field: data')
+        else:
+            raise ValueError('Missing event name field: event')
+    else:
+        raise RuntimeError("No event data to return")
+
     return jsonify(json_data)
 
 # POST
