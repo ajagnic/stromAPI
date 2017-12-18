@@ -33,8 +33,8 @@ class TestServerSocket(unittest.TestCase):
         self.url = "http://127.0.0.1:5000"
         self.server = ServerThread()
         self.coordinator = Coordinator()
-        self.dum = {"engine_rules": {"kafka": "kody"}, "events": {"lucy_on_couch": ["yikes", "getoverhere", "notreats"]}, "lucky_napping": ["awww", "sleepy", "sleepwoof"]}
-        self.dummy = {"event": "lucy_on_couch_kody", "data": ["yikes", "getoverhere", "notreats"]}
+        self.dum = {"engine_rules": {"kafka": "kody"}, "events": {"lucy_on_couch": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}]}, "lucky_napping": ["awww", "sleepy", "sleepwoof"]}
+        self.dummy = {"event": "lucy_on_couch_kody", "data": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}]}
 
     def test_handle_event_detection(self):
 
@@ -48,9 +48,9 @@ class TestServerSocket(unittest.TestCase):
         time.sleep(5)
 
         self.assertTrue(self.server.sock.check_msg)
-        terminate_server()
+        #terminate_server()
 
     def test_test_parse(self):
         result = self.coordinator._parse_events(self.dum)
-        self.assertIn({"event": "lucy_on_couch_kody", "data": ["yikes", "getoverhere", "notreats"]}, result)
+        self.assertIn({"event": "lucy_on_couch_kody", "data": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}]}, result)
 

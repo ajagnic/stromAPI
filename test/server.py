@@ -154,14 +154,13 @@ def handle_client_message(json):
 def handle_client_message(data):
     socketio.check_msg = True
     print('LUCY IS ON THE COUCH OH MY GOD!!'.format(data))
-    print('socket check ', socketio.check_msg)
 
 def handle_event_detection():
     json_data = request.get_json()
     if json_data is not None:
         if "event" in json_data:
             if "data" in json_data:
-                socketio.emit(json_data["event"], json_data["data"])
+                socketio.emit(json_data["event"], json.dumps(json_data["data"]))
             else:
                 raise ValueError('Missing event data field: data')
         else:
