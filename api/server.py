@@ -146,7 +146,7 @@ def handle_event_detection():
     if json_data is not None:
         if "event" in json_data:
             if "data" in json_data:
-                socketio.emit(json_data["event"], json_data["data"])
+                socketio.emit(json_data["event"], json.dumps(json_data["data"]))
             else:
                 raise ValueError('Missing event data field: data')
         else:
