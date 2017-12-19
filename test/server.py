@@ -142,7 +142,7 @@ def get(this):
 def index():
     return render_template('index.html')
 
-app.check = False
+
 
 @socketio.on('message')
 def handle_client_message(json):
@@ -153,7 +153,7 @@ def handle_client_message(json):
 @socketio.on('lucy_on_couch_kody2')
 def handle_client_message(json):
     socketio.check_msg = True
-    print('here we go a data-ing {0}'.format(json))
+    print('here we go a data-ing {0}'.format(json.loads(json)))
 
 def handle_event_detection():
     json_data = request.get_json()
