@@ -150,10 +150,10 @@ def handle_client_message(json):
     print('###____#### Handle Client Message {0}'.format(json))
     print('socket check ', socketio.check_msg)
 
-@socketio.on('lucy_on_couch_kody')
-def handle_client_message(data):
+@socketio.on('lucy_on_couch_kody2')
+def handle_client_message(json):
     socketio.check_msg = True
-    print('LUCY IS ON THE COUCH OH MY GOD!!'.format(data))
+    print('here we go a data-ing {0}'.format(json))
 
 def handle_event_detection():
     json_data = request.get_json()
