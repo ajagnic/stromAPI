@@ -48,7 +48,7 @@ class TestServerSocket(unittest.TestCase):
         time.sleep(5)
 
         self.assertTrue(self.server.sock.check_msg)
-        #terminate_server()
+        terminate_server()
 
     def test_test_parse(self):
         result = self.coordinator._parse_events(self.dum)
