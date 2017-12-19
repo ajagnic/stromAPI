@@ -3,5 +3,5 @@
 
 socket.on('lucy_on_couch_kody', function (data) {
     console.log(data);
-    socket.emit('lucy_on_couch_kody', data);
+    socket.send('lucy_on_couch_kody', data);
 })
