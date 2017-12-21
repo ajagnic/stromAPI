@@ -1,10 +1,12 @@
 """ Flask-API server for communications b/w CLI and services. """
 import json
-from flask import Flask, request, Response, jsonify, render_template
+import time
+
+from flask import Flask, request, Response, jsonify
 from flask_restful import reqparse
-from flask_socketio import SocketIO, emit, send
-from strom.dstream.dstream import DStream
+from flask_socketio import SocketIO
 from strom.coordinator.coordinator import Coordinator
+from strom.dstream.dstream import DStream
 from strom.kafka.producer.producer import Producer
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
@@ -110,7 +112,8 @@ def load():
 def load_kafka():
     """ Collect data and produce to kafka topic. """
 
-    logger.fatal("data hit server load")
+    # logger.fatal("data hit server load")
+    start_load = time.time()
     tk['load_kafka'].start()
     args = srv.parse()
     try:
@@ -123,6 +126,7 @@ def load_kafka():
         srv.producers[kafka_topic].produce(data)
         logger.debug("load_kafka: producer.produce done")
         tk['load_kafka : try (encoding/producing data)'].stop()
+        logger.fatal("Load kafka route took {:.5f} seconds".format(time.time() - start_load))
     except Exception as ex:
         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
         # bad_resp = Response(ex, 400)
@@ -134,6 +138,7 @@ def load_kafka():
         resp.headers['Access-Control-Allow-Origin']='*'
         tk['load_kafka'].stop()
         return resp
+
 
 def index():
     resp = Response('STROM-API is UP', 200)
