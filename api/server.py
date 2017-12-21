@@ -109,6 +109,8 @@ def load():
 
 def load_kafka():
     """ Collect data and produce to kafka topic. """
+
+    logger.fatal("data hit server load")
     tk['load_kafka'].start()
     args = srv.parse()
     try:

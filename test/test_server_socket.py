@@ -33,7 +33,7 @@ class TestServerSocket(unittest.TestCase):
         self.url = "http://127.0.0.1:5000"
         self.server = ServerThread()
         self.coordinator = Coordinator()
-        self.dum = {"engine_rules": {"kafka": "kody"}, "events": {"lucy_on_couch": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}]}, "lucky_napping": ["awww", "sleepy", "sleepwoof"]}
+        self.dum = {"engine_rules": {"kafka": "kody"}, "events": {"lucy_on_couch": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}], "lucky_napping": [{"key":"awww"}, {"key": "sleepy"}, {"key": "sleepwoof"}]}}
         self.dummy = {"event": "lucy_on_couch_kody", "data": [{"yikes":"Oh_NO"}, {"getoverhere":True, "notreats":"Why not"}]}
 
     def test_handle_event_detection(self):
