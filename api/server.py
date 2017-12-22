@@ -24,7 +24,7 @@ class Server():
         self.coordinator = Coordinator()
         self.kafka_url = '127.0.0.1:9092'
         self.load_producer = Producer(self.kafka_url, b'load')
-        self.producers = {}
+        # self.producers = {}
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
@@ -65,7 +65,7 @@ def define():
         cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
         srv.coordinator.process_template(cur_dstream)
-        srv.producer_new(cur_dstream["engine_rules"]["kafka"])
+        # srv.producer_new(cur_dstream["engine_rules"]["kafka"])
         logger.debug("define: coordinator.process-template done")
         tk['define : try (template loading/processing)'].stop()
     except Exception as ex:
@@ -120,10 +120,10 @@ def load_kafka():
         tk['load_kafka : try (encoding/producing data)'].start()
         data = args['stream_data'].encode()
         logger.debug("load_kafka: encode stream_data done")
-        kafka_topic = args['topic']
+        # kafka_topic = args['topic']
         logger.debug("load_kafka: encode topic done")
-        # srv.load_producer.produce(data)
-        srv.producers[kafka_topic].produce(data)
+        srv.load_producer.produce(data)
+        # srv.producers[kafka_topic].produce(data)
         logger.debug("load_kafka: producer.produce done")
         tk['load_kafka : try (encoding/producing data)'].stop()
         logger.fatal("Load kafka route took {:.5f} seconds".format(time.time() - start_load))
