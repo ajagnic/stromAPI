@@ -1,4 +1,4 @@
-""" Flask-API server for communications b/w CLI and services. """
+""" Flask server for coordination of processes: device registration, ingestion/processing of data, and retrieval of found events. """
 import json
 import time
 
@@ -11,11 +11,12 @@ from strom.kafka.producer.producer import Producer
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Server():
+    """ Class for storing information, and initialization of needed modules. """
     def __init__(self):
         self.expected_args = [
         'template', 'data', 'source', 'topic', 'token', 'stream_data', 'stream_template'
@@ -31,16 +32,21 @@ class Server():
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
-        dstream = DStream() # NOTE TODO
+        dstream = DStream()
         tk['Server._dstream_new'].stop()
         return dstream
 
     def producer_new(self, topic):
+        """
+        :param topic: Name of topic to produce to
+        :type topic: byte string
+        """
         tk['Server.producer_new'].start()
         self.producers[topic] = Producer(self.kafka_url, topic.encode())
         tk['Server.producer_new'].stop()
 
     def parse(self):
+        """ Wrapper function for reqparse.parse_args """
         tk['Server.parse'].start()
         ret = self.parser.parse_args()
         tk['Server.parse'].stop()
@@ -52,7 +58,9 @@ socketio = SocketIO(app)
 srv = Server()
 
 def define():
-    """ Collect template for DStream init and return stream_token. """
+    """ Collect template for DStream init and return stream_token.
+    Expects 'template' argument containing user-formatted template.
+    """
     tk['define'].start()
     args = srv.parse()
     template = args['template'] #   dstream template
@@ -80,20 +88,10 @@ def define():
         tk['define'].stop()
         return resp
 
-def add_source(): #NOTE TODO
-    """ Collect data source and set in DStream field """
-    args = srv.parse()
-    if args['topic'] is not None:
-        topic = args['topic']   #   kafka topic
-        print(topic)
-    source = args['source'] #   file/kafka
-    token = args['token']   #   stream_token
-    print(source)
-    print(token)
-    return 'Success.', 200
-
 def load():
-    """ Collect tokenized data. """
+    """ Collect tokenized data.
+    Expects 'data' argument containing user dataset to process.
+    """
     args = srv.parse()
     data = args['data'] #   data with token
     try:
@@ -110,8 +108,9 @@ def load():
         return 'Success.', 202
 
 def load_kafka():
-    """ Collect data and produce to kafka topic. """
-
+    """ Collect data and produce to kafka topic.
+    Expects 'stream_data' argument containing user dataset to process.
+    """
     # logger.fatal("data hit server load")
     start_load = time.time()
     tk['load_kafka'].start()
@@ -146,7 +145,9 @@ def index():
     return resp
 
 def get(this):
-    """ Returns data, specified by endpoint & URL params. """
+    """ Returns data, specified by endpoint & URL params.
+    Expects multiple url arguments: range or time, and token.
+    """
     tk['get'].start()
     time_range = request.args.get('range', '')
     time = request.args.get('time', '')
@@ -186,9 +187,21 @@ def handle_event_detection():
     tk['handle_event_detection'].stop()
     return jsonify(json_data)
 
+# def add_source():
+#     """ Collect data source and set in DStream field """
+#     args = srv.parse()
+#     if args['topic'] is not None:
+#         topic = args['topic']   #   kafka topic
+#         print(topic)
+#     source = args['source'] #   file/kafka
+#     token = args['token']   #   stream_token
+#     print(source)
+#     print(token)
+#     return 'Success.', 200
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
-app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
+# app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
 app.add_url_rule('/new_event', 'handle_event_detection', handle_event_detection, methods=['POST'])
 # KAFKA POST
