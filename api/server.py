@@ -7,7 +7,7 @@ from flask_restful import reqparse
 from flask_socketio import SocketIO
 from strom.coordinator.coordinator import Coordinator
 from strom.dstream.dstream import DStream
-from strom.kafka.producer.producer import Producer
+# from strom.kafka.producer.producer import Producer
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
 from strom.engine.engine import EngineThread
@@ -24,8 +24,8 @@ class Server():
         ]
         self.parser = reqparse.RequestParser()
         self.coordinator = Coordinator()
-        self.kafka_url = '127.0.0.1:9092'
-        self.load_producer = Producer(self.kafka_url, b'load')
+        # self.kafka_url = '127.0.0.1:9092'
+        # self.load_producer = Producer(self.kafka_url, b'load')
         # self.producers = {}
         self.dstream = None
         for word in self.expected_args:
@@ -41,14 +41,14 @@ class Server():
         tk['Server._dstream_new'].stop()
         return dstream
 
-    def producer_new(self, topic):
-        """
-        :param topic: Name of topic to produce to
-        :type topic: byte string
-        """
-        tk['Server.producer_new'].start()
-        self.producers[topic] = Producer(self.kafka_url, topic.encode())
-        tk['Server.producer_new'].stop()
+    # def producer_new(self, topic):
+    #     """
+    #     :param topic: Name of topic to produce to
+    #     :type topic: byte string
+    #     """
+    #     tk['Server.producer_new'].start()
+    #     self.producers[topic] = Producer(self.kafka_url, topic.encode())
+    #     tk['Server.producer_new'].stop()
 
     def parse(self):
         """ Wrapper function for reqparse.parse_args """
@@ -112,38 +112,6 @@ def load():
     else:
         return 'Success.', 202
 
-def load_kafka():
-    """ Collect data and produce to kafka topic.
-    Expects 'stream_data' argument containing user dataset to process.
-    """
-    # logger.fatal("data hit server load")
-    start_load = time.time()
-    tk['load_kafka'].start()
-    args = srv.parse()
-    try:
-        tk['load_kafka : try (encoding/producing data)'].start()
-        data = args['stream_data'].encode()
-        logger.debug("load_kafka: encode stream_data done")
-        # kafka_topic = args['topic']
-        logger.debug("load_kafka: encode topic done")
-        srv.load_producer.produce(data)
-        # srv.producers[kafka_topic].produce(data)
-        logger.debug("load_kafka: producer.produce done")
-        tk['load_kafka : try (encoding/producing data)'].stop()
-        logger.fatal("Load kafka route took {:.5f} seconds".format(time.time() - start_load))
-    except Exception as ex:
-        logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
-        # bad_resp = Response(ex, 400)
-        # bad_resp.headers['Access-Control-Allow-Origin']='*'
-        # return bad_resp
-        return '{}'.format(ex), 400
-    else:
-        resp = Response('Success.', 202)
-        resp.headers['Access-Control-Allow-Origin']='*'
-        tk['load_kafka'].stop()
-        return resp
-
-
 def index():
     resp = Response('STROM-API is UP', 200)
     resp.headers['Access-Control-Allow-Origin']='*'
@@ -192,6 +160,37 @@ def handle_event_detection():
     tk['handle_event_detection'].stop()
     return jsonify(json_data)
 
+# def load_kafka():
+#     """ Collect data and produce to kafka topic.
+#     Expects 'stream_data' argument containing user dataset to process.
+#     """
+#     # logger.fatal("data hit server load")
+#     start_load = time.time()
+#     tk['load_kafka'].start()
+#     args = srv.parse()
+#     try:
+#         tk['load_kafka : try (encoding/producing data)'].start()
+#         data = args['stream_data'].encode()
+#         logger.debug("load_kafka: encode stream_data done")
+#         # kafka_topic = args['topic']
+#         logger.debug("load_kafka: encode topic done")
+#         srv.load_producer.produce(data)
+#         # srv.producers[kafka_topic].produce(data)
+#         logger.debug("load_kafka: producer.produce done")
+#         tk['load_kafka : try (encoding/producing data)'].stop()
+#         logger.fatal("Load kafka route took {:.5f} seconds".format(time.time() - start_load))
+#     except Exception as ex:
+#         logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
+#         # bad_resp = Response(ex, 400)
+#         # bad_resp.headers['Access-Control-Allow-Origin']='*'
+#         # return bad_resp
+#         return '{}'.format(ex), 400
+#     else:
+#         resp = Response('Success.', 202)
+#         resp.headers['Access-Control-Allow-Origin']='*'
+#         tk['load_kafka'].stop()
+#         return resp
+
 # def add_source():
 #     """ Collect data source and set in DStream field """
 #     args = srv.parse()
@@ -209,13 +208,12 @@ app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 # app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
 app.add_url_rule('/new_event', 'handle_event_detection', handle_event_detection, methods=['POST'])
-# KAFKA POST
-app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
-app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
-
+# KAFKA POST
+# app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
+# app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 
 
 def start():
