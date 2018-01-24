@@ -125,9 +125,6 @@ def get(this):
     time_range = request.args.get('range', '')
     time = request.args.get('time', '')
     token = request.args.get('token', '')
-    print(this) #   endpoint: raw, filtered, derived_params, events
-    print(time)
-    print(time_range)
     if time_range:
         logger.debug("get: got time_range")
         if time_range == 'ALL':
