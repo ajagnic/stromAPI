@@ -10,6 +10,7 @@ from strom.dstream.dstream import DStream
 from strom.kafka.producer.producer import Producer
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
+from strom.engine.engine import EngineThread
 
 __version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
@@ -29,6 +30,10 @@ class Server():
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
+
+        # ENGINE
+        self.engine = EngineThread()
+        self.engine.start()
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
@@ -95,11 +100,11 @@ def load():
     args = srv.parse()
     data = args['data'] #   data with token
     try:
-        json_data = json.loads(data)
+        unjson_data = json.loads(data)
         logger.debug("load: json.loads done")
-        token = json_data[0]['stream_token']
+        token = unjson_data[0]['stream_token']
         logger.debug("load: got token")
-        srv.coordinator.process_data_sync(json_data, token)
+        srv.engine.buffer.append(unjson_data)
         logger.debug("load: coordinator.process_data_sync done")
     except Exception as ex:
         logger.warning("Server Error in load: Data loading/processing - {}".format(ex))
