@@ -33,7 +33,7 @@ class Server():
 
         # ENGINE
         self.engine = EngineThread()
-        self.engine.start()
+        self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
@@ -104,7 +104,7 @@ def load():
         logger.debug("load: json.loads done")
         token = unjson_data[0]['stream_token']
         logger.debug("load: got token")
-        srv.engine.buffer.append(unjson_data)
+        srv.engine.buffer.append(unjson_data)# NOTE CHECK DATA FORMATS COMPARED TO LOAD_KAFKA
         logger.debug("load: coordinator.process_data_sync done")
     except Exception as ex:
         logger.warning("Server Error in load: Data loading/processing - {}".format(ex))
