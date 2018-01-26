@@ -110,7 +110,9 @@ def load():
         logger.warning("Server Error in load: Data loading/processing - {}".format(ex))
         return '{}'.format(ex), 400
     else:
-        return 'Success.', 202
+         resp = Response('Success.', 202)
+         resp.headers['Access-Control-Allow-Origin']='*'
+         return resp
 
 def index():
     resp = Response('STROM-API is UP', 200)
