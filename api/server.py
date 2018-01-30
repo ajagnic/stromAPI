@@ -3,6 +3,7 @@ import json
 import time
 
 from flask import Flask, request, Response, jsonify
+from multiprocessing import Pipe
 from flask_restful import reqparse
 from flask_socketio import SocketIO
 from strom.coordinator.coordinator import Coordinator
@@ -32,7 +33,8 @@ class Server():
             self.parser.add_argument(word)
 
         # ENGINE
-        self.engine = EngineThread()
+        self.server_conn, self.engine_conn = Pipe()
+        self.engine = EngineThread(self.engine_conn)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
 
     def _dstream_new(self):
@@ -104,8 +106,8 @@ def load():
         logger.debug("load: json.loads done")
         token = unjson_data[0]['stream_token']
         logger.debug("load: got token")
-        srv.engine.buffer.append(unjson_data)# NOTE CHECK DATA FORMATS COMPARED TO LOAD_KAFKA
-        logger.debug("load: coordinator.process_data_sync done")
+        srv.server_conn.send(unjson_data)# NOTE CHECK DATA FORMATS COMPARED TO LOAD_KAFKA
+        logger.debug("load: data piped to engine buffer")
     except Exception as ex:
         logger.warning("Server Error in load: Data loading/processing - {}".format(ex))
         return '{}'.format(ex), 400
