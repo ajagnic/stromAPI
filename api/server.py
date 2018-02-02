@@ -34,7 +34,7 @@ class Server():
 
         # ENGINE
         self.server_conn, self.engine_conn = Pipe()
-        self.engine = EngineThread(self.engine_conn)
+        self.engine = EngineThread(self.engine_conn, buffer_max_batch=50, buffer_max_seconds=2)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
 
     def _dstream_new(self):
