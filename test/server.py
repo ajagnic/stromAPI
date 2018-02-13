@@ -6,7 +6,6 @@ from flask_restful import reqparse
 from flask_socketio import SocketIO, emit, send
 from strom.dstream.dstream import DStream
 from strom.coordinator.coordinator import Coordinator
-from strom.kafka.producer.producer import Producer
 from strom.utils.logger.logger import logger
 
 __version__ = '0.0.1'
@@ -20,8 +19,6 @@ class Server():
         ]
         self.parser = reqparse.RequestParser()
         self.coordinator = Coordinator()
-        self.kafka_url = '127.0.0.1:9092'
-        self.load_producer = Producer(self.kafka_url, b'load')
         self.dstream = None
         for word in self.expected_args:
             self.parser.add_argument(word)
@@ -66,18 +63,6 @@ def define():
         resp.headers['Access-Control-Allow-Origin']='*'
         return resp
 
-def add_source(): #NOTE TODO
-    """ Collect data source and set in DStream field """
-    args = srv.parse()
-    if args['topic'] is not None:
-        topic = args['topic']   #   kafka topic
-        print(topic)
-    source = args['source'] #   file/kafka
-    token = args['token']   #   stream_token
-    print(source)
-    print(token)
-    return 'Success.', 200
-
 def load():
     """ Collect tokenized data. """
     args = srv.parse()
@@ -94,24 +79,6 @@ def load():
         return '{}'.format(ex), 400
     else:
         return 'Success.', 202
-
-def load_kafka():
-    """ Collect data and produce to kafka topic. """
-    args = srv.parse()
-    try:
-        data = args['stream_data'].encode()
-        logger.debug("load_kafka: encode stream_data done")
-        srv.load_producer.produce(data)
-        logger.debug("load_kafka: producer.produce done")
-    except Exception as ex:
-        logger.fatal("Server Error in kafka_load: Encoding/producing data - {}".format(ex))
-        bad_resp = Response(ex, 400)
-        bad_resp.headers['Access-Control-Allow-Origin']='*'
-        return bad_resp
-    else:
-        resp = Response('Success.', 202)
-        resp.headers['Access-Control-Allow-Origin']='*'
-        return resp
 
 def index():
     resp = Response('STROM-API is UP', 200)
@@ -177,12 +144,8 @@ def terminate():
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
-app.add_url_rule('/api/add-source', 'add_source', add_source, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
 app.add_url_rule('/new_event', 'handle_event_detection', handle_event_detection, methods=['POST'])
-# KAFKA POST
-app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
-app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
