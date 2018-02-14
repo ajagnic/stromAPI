@@ -78,21 +78,21 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    def test_load_kafka(self):
-        if self.server_up:
-            msg = "Hello !%&^!"
-            data = msg.encode()
-            ret = requests.post(self.url + '/kafka/load', data={'stream_data': data, 'topic': 'test'})
-            self.assertEqual(ret.status_code, 202)
-        else:
-            self.fail("!! SERVER NOT FOUND !!")
-
-    def test_load_kafka_get_fail(self):
-        if self.server_up:
-            ret = requests.get(self.url + '/kafka/load')
-            self.assertEqual(ret.status_code, 405)
-        else:
-            self.fail("!! SERVER NOT FOUND !!")
+    # def test_load_kafka(self):
+    #     if self.server_up:
+    #         msg = "Hello !%&^!"
+    #         data = msg.encode()
+    #         ret = requests.post(self.url + '/kafka/load', data={'stream_data': data, 'topic': 'test'})
+    #         self.assertEqual(ret.status_code, 202)
+    #     else:
+    #         self.fail("!! SERVER NOT FOUND !!")
+    #
+    # def test_load_kafka_get_fail(self):
+    #     if self.server_up:
+    #         ret = requests.get(self.url + '/kafka/load')
+    #         self.assertEqual(ret.status_code, 405)
+    #     else:
+    #         self.fail("!! SERVER NOT FOUND !!")
 
     def test_get_events_all(self):
         if self.server_up:
