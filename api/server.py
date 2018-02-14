@@ -151,10 +151,20 @@ def handle_event_detection():
     tk['handle_event_detection'].stop()
     return jsonify(json_data)
 
+
+def storage():
+    return 'i am database?'
+
+  
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
 app.add_url_rule('/new_event', 'handle_event_detection', handle_event_detection, methods=['POST'])
+app.add_url_rule('/storage', 'storage', storage, methods=['POST'])
+# KAFKA POST
+app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
+app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
+
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
