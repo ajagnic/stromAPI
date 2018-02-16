@@ -40,6 +40,7 @@ class Server():
         # STORAGE QUEUE AND WORKER
         self.storage_queue = Queue()
         self.storage_worker = StorageWorker(self.storage_queue, storage_config, config['storage_type'])
+        self.storage_worker.start()
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
