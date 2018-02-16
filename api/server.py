@@ -160,11 +160,10 @@ def handle_event_detection():
 def data_storage():
     data = request.data
 
-    d = pickle.loads(data)
-
+    parsed = pickle.loads(data)
 
     # error handling
-    srv.storage_queue.put('bstream', data['token'], json.loads(data['data']))
+    srv.storage_queue.put('bstream', data['token'], parsed[0], parsed[1])
     return 'ok'
 
 
@@ -172,7 +171,7 @@ def template_storage():
     d = request.data
     parsed = pickle.loads(d)
     # error handling
-    srv.storage_queue.put('template', parsed[0], parsed[1])
+    srv.storage_queue.put('template', parsed)
 
     return 'ok'
   
