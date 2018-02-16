@@ -162,20 +162,28 @@ def handle_event_detection():
 
 
 def data_storage():
+    logger.debug("Starting data storage")
+
     data = request.data
 
     parsed = pickle.loads(data)
 
+    logger.debug("putting DataFrame in queue")
     # error handling
     srv.storage_queue.put('bstream', parsed[0], parsed[1])
+    logger.debug("Finished queuing")
+
     return 'ok'
 
 
 def template_storage():
+    logger.debug("Starting template storage")
     d = request.data
     parsed = pickle.loads(d)
     # error handling
+    logger.debug("putting template in queue")
     srv.storage_queue.put('template', parsed)
+    logger.debug("Finished queuing")
 
     return 'ok'
 
