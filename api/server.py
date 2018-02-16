@@ -167,7 +167,7 @@ def data_storage():
     parsed = pickle.loads(data)
 
     # error handling
-    srv.storage_queue.put('bstream', data['token'], parsed[0], parsed[1])
+    srv.storage_queue.put('bstream', parsed[0], parsed[1])
     return 'ok'
 
 
