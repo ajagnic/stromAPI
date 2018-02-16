@@ -13,6 +13,8 @@ from strom.dstream.dstream import DStream
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
 from strom.engine.engine import EngineThread
+from strom.storage.storage_worker import StorageWorker, storage_config
+from strom.utils.configer import configer as config
 
 __version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
@@ -37,6 +39,7 @@ class Server():
 
         # STORAGE QUEUE AND WORKER
         self.storage_queue = Queue()
+        self.storage_worker = StorageWorker(self.storage_queue, storage_config, config['storage_type'])
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
