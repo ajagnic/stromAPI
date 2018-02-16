@@ -1,9 +1,11 @@
 """ Flask server for coordination of processes: device registration, ingestion/processing of data, and retrieval of found events. """
 import json
+import pickle
 import time
 
 from flask import Flask, request, Response, jsonify
 from multiprocessing import Pipe
+from queue import Queue
 from flask_restful import reqparse
 from flask_socketio import SocketIO
 from strom.coordinator.coordinator import Coordinator
@@ -32,6 +34,9 @@ class Server():
         self.server_conn, self.engine_conn = Pipe()
         self.engine = EngineThread(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
+
+        # STORAGE QUEUE AND WORKER
+        self.storage_queue = Queue()
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
@@ -152,18 +157,31 @@ def handle_event_detection():
     return jsonify(json_data)
 
 
-def storage():
-    return 'i am database?'
+def data_storage():
+    data = request.data
 
+    d = pickle.loads(data)
+
+
+    # error handling
+    srv.storage_queue.put('bstream', data['token'], json.loads(data['data']))
+    return 'ok'
+
+
+def template_storage():
+    d = request.data
+    parsed = pickle.loads(d)
+    # error handling
+    srv.storage_queue.put('template', parsed[0], parsed[1])
+
+    return 'ok'
   
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
 app.add_url_rule('/new_event', 'handle_event_detection', handle_event_detection, methods=['POST'])
-app.add_url_rule('/storage', 'storage', storage, methods=['POST'])
-# KAFKA POST
-app.add_url_rule('/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
-app.add_url_rule('/api/kafka/load', 'load_kafka', load_kafka, methods=['POST'])
+app.add_url_rule('/data_storage', 'data_storage', data_storage, methods=['POST'])
+app.add_url_rule('/template_storage', 'template_storage', template_storage, methods=['POST'])
 
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
