@@ -1,20 +1,20 @@
 """ Flask server for coordination of processes: device registration, ingestion/processing of data, and retrieval of found events. """
 import json
 import pickle
-import time
-
-from flask import Flask, request, Response, jsonify
 from multiprocessing import Pipe
 from queue import Queue
+
+from flask import Flask, request, Response, jsonify
 from flask_restful import reqparse
 from flask_socketio import SocketIO
+
 from strom.coordinator.coordinator import Coordinator
 from strom.dstream.dstream import DStream
-from strom.utils.logger.logger import logger
-from strom.utils.stopwatch import stopwatch as tk
 from strom.engine.engine import EngineThread
 from strom.storage.storage_worker import StorageWorker, storage_config
 from strom.utils.configer import configer as config
+from strom.utils.logger.logger import logger
+from strom.utils.stopwatch import stopwatch as tk
 
 __version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
@@ -178,7 +178,7 @@ def template_storage():
     srv.storage_queue.put('template', parsed)
 
     return 'ok'
-  
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
