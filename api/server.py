@@ -209,6 +209,9 @@ def retrieve_templates(amount):
             return srv.storage_interface.retrieve_current_by_id(template_id)
         elif stream_token:
             return srv.storage_interface.retrieve_current_template(stream_token)
+        else:
+            # return latest template from table, w/o token or id
+            pass
     else:
         return "Value Error", 403
 
