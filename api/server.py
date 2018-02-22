@@ -10,7 +10,7 @@ from flask_socketio import SocketIO
 
 from strom.coordinator.coordinator import Coordinator
 from strom.dstream.dstream import DStream
-from strom.engine.engine import EngineThread
+from strom.engine.engine import Engine
 from strom.storage.storage_worker import StorageWorker, storage_config
 from strom.utils.configer import configer as config
 from strom.utils.logger.logger import logger
@@ -34,7 +34,7 @@ class Server():
 
         # ENGINE
         self.server_conn, self.engine_conn = Pipe()
-        self.engine = EngineThread(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
+        self.engine = Engine(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
 
         # STORAGE QUEUE AND WORKER
