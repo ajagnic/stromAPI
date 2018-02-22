@@ -212,7 +212,7 @@ def retrieve_templates(amount):
         elif stream_token:
             return srv.storage_interface.retrieve_current_template(stream_token)
         else:
-            # TODO SAME ^
+            # TODO SAME ^ + TEST THIS
             return srv.storage_interface.db.select(query="SELECT * FROM templates limit 1 WHERE version=(SELECT MAX(version) FROM templates);")
 
 
