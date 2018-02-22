@@ -201,21 +201,16 @@ def retrieve_templates(amount):
         if template_id:
             return srv.storage_interface.retrieve_template_by_id(template_id)
         elif stream_token:
-            # TODO METHOD WRAPPER IN INTERFACE CLASS
-            return srv.storage_interface.db.retrieve("templates", "stream_token", f"'{stream_token}'")
+            return srv.storage_interface.retrieve_all_by_token(stream_token)
         else:
             return srv.storage_interface.retrieve_all_templates()
     elif str(amount).lower() == "latest" or str(amount).lower() == "current":
         if template_id:
-            # TODO SAME ^
-            return srv.storage_interface.db.retrieve("templates", "template_id", f"'{template_id}'", latest=True)
+            return srv.storage_interface.retrieve_current_by_id(template_id)
         elif stream_token:
             return srv.storage_interface.retrieve_current_template(stream_token)
-        else:
-            # TODO SAME ^ + TEST THIS
-            return srv.storage_interface.db.select(query="SELECT * FROM templates limit 1 WHERE version=(SELECT MAX(version) FROM templates);")
-
-
+    else:
+        return "Value Error", 403
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
