@@ -72,7 +72,6 @@ def define():
     Expects 'template' argument containing user-formatted template.
     """
     tk['define'].start()
-    print("HERWE")
     args = srv.parse()
     template = args['template'] #   dstream template
     cur_dstream = srv._dstream_new()
@@ -83,7 +82,6 @@ def define():
         logger.debug("define: json.loads done")
         cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
-        print("ABOUT TO GO")
         template_df = srv.coordinator.process_template(cur_dstream)
         srv.storage_queue.put(('template', template_df))
         logger.debug("define: coordinator.process-template done")
