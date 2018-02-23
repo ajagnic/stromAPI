@@ -233,7 +233,7 @@ def stop_engine():
     while srv.engine.is_alive():
         pass
     srv.engine_stopped = datetime.datetime.now()
-    return f"engine stopped {srv.engine_stopped}"
+    return jsonify({"engine_stopped": True, "time": srv.engine_stopped})
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
