@@ -225,14 +225,15 @@ def template_storage():
 def retrieve_templates(amount):
     template_id = request.args.get("template_id", "")
     stream_token = request.args.get("stream_token", "")
-    if str(amount).lower() == "all":
+    amount = str(amount).lower()
+    if amount == "all":
         if template_id:
             return srv.storage_interface.retrieve_template_by_id(template_id)
         elif stream_token:
             return srv.storage_interface.retrieve_all_by_token(stream_token)
         else:
             return srv.storage_interface.retrieve_all_templates()
-    elif str(amount).lower() == "latest" or str(amount).lower() == "current":
+    elif amount == "latest" or amount == "current":
         if template_id:
             return srv.storage_interface.retrieve_current_by_id(template_id)
         elif stream_token:
