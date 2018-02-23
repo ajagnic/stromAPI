@@ -228,6 +228,12 @@ def engine_status():
         delta_text = "time_stopped"
     return jsonify({"running": status, "started": started, "stopped": stopped, delta_text: {"days": delta_t.days, "seconds": delta_t.seconds}})
 
+def stop_engine():
+    srv.server_conn.send("stop_poison_pill")
+    while srv.engine.is_alive():
+        pass
+    return f"engine stopped {datetime.datetime.now()}"
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
@@ -238,6 +244,7 @@ app.add_url_rule('/template_storage', 'template_storage', template_storage, meth
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/engine_status', 'engine_status', engine_status, methods=['GET'])
+app.add_url_rule('/api/stop_engine', 'stop_engine', stop_engine, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 app.add_url_rule('/api/retrieve/<amount>', 'retrieve_templates', retrieve_templates, methods=['GET'])
 
