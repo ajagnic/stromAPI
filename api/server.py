@@ -232,7 +232,8 @@ def stop_engine():
     srv.server_conn.send("stop_poison_pill")
     while srv.engine.is_alive():
         pass
-    return f"engine stopped {datetime.datetime.now()}"
+    srv.engine_stopped = datetime.datetime.now()
+    return f"engine stopped {srv.engine_stopped}"
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
