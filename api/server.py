@@ -212,6 +212,10 @@ def retrieve_templates(amount):
     else:
         return "Value Error", 403
 
+def engine_status():
+    status = srv.engine.is_alive()
+    return str(status)
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
@@ -221,6 +225,7 @@ app.add_url_rule('/template_storage', 'template_storage', template_storage, meth
 
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
+app.add_url_rule('/api/engine_status', 'engine_status', engine_status, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 app.add_url_rule('/api/retrieve/<amount>', 'retrieve_templates', retrieve_templates, methods=['GET'])
 
