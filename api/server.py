@@ -1,9 +1,9 @@
 """ Flask server for coordination of processes: device registration, ingestion/processing of data, and retrieval of found events. """
+import datetime
 import json
 import pickle
 from multiprocessing import Pipe
 from queue import Queue
-import datetime
 
 from flask import Flask, request, Response, jsonify
 from flask_restful import reqparse
@@ -12,12 +12,11 @@ from flask_socketio import SocketIO
 from strom.coordinator.coordinator import Coordinator
 from strom.dstream.dstream import DStream
 from strom.engine.engine import Engine
+from strom.storage.sqlite_interface import SqliteInterface
 from strom.storage.storage_worker import StorageWorker, storage_config
 from strom.utils.configer import configer as config
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
-
-from strom.storage.sqlite_interface import SqliteInterface
 
 __version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
