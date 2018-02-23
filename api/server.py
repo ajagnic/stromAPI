@@ -44,7 +44,7 @@ class Server():
         self.storage_worker = StorageWorker(self.storage_queue, storage_config, config['storage_type'])
         self.storage_worker.start()
 
-        # NOTE TODO make more flexible
+        # NOTE TODO MAKE MORE FLEXIBLE?
         self.storage_interface = SqliteInterface(storage_config['local']['args'][0])
 
     def _dstream_new(self):
@@ -127,26 +127,54 @@ def index():
     resp.headers['Access-Control-Allow-Origin']='*'
     return resp
 
+# def get(this):
+#     """ Returns data, specified by endpoint & URL params.
+#     Expects multiple url arguments: range or time, and token.
+#     """
+#     tk['get'].start()
+#     time_range = request.args.get('range', '')
+#     time = request.args.get('time', '')
+#     token = request.args.get('token', '')
+#     if time_range:
+#         logger.debug("get: got time_range")
+#         if time_range == 'ALL':
+#             logger.debug("get: time_range is ALL")
+#             tk['get : coordinator.get_events'].start()
+#             result = srv.coordinator.get_events(token)
+#             tk['get : coordinator.get_events'].stop()
+#             logger.debug("get: coordinator.get_events done")
+#             tk['get'].stop()
+#             return ("\n" + str(result) + "\n"), 200
+#         else:
+#             return '', 403
+#     elif time:
+#         pass
+
+# TODO NEW, STOPWATCH REM'D FOR CLARITY
+# TODO FLESH OUT FUNC, NEED COORD METHODS?
 def get(this):
-    """ Returns data, specified by endpoint & URL params.
-    Expects multiple url arguments: range or time, and token.
-    """
-    tk['get'].start()
-    time_range = request.args.get('range', '')
-    time = request.args.get('time', '')
-    token = request.args.get('token', '')
-    if time_range:
-        logger.debug("get: got time_range")
-        if time_range == 'ALL':
-            logger.debug("get: time_range is ALL")
-            tk['get : coordinator.get_events'].start()
-            result = srv.coordinator.get_events(token)
-            tk['get : coordinator.get_events'].stop()
-            logger.debug("get: coordinator.get_events done")
-            tk['get'].stop()
-            return ("\n" + str(result) + "\n"), 200
-        else:
-            return '', 403
+    time_range = request.args.get('range', '')# timestamp range
+    time = request.args.get('time', '')# single timestamp
+    token = request.args.get('token', '')# stream_token
+    if this in ["events", "raw", "filtered", "derived"]:
+        if this == "raw":
+            pass
+        elif this == "filtered":
+            pass
+        elif this == "derived":
+            pass
+        else:# events
+            if time_range:
+                if str(time_range).lower() == 'all':
+                    result = srv.coordinator.get_events(token)
+                    return result, 200
+                else:
+                    pass
+            elif time:
+                pass
+    else:
+        return "Value Error", 403
+
 
 def handle_event_detection():
     tk['handle_event_detection'].start()
