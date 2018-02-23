@@ -3,6 +3,7 @@ import json
 import pickle
 from multiprocessing import Pipe
 from queue import Queue
+import datetime
 
 from flask import Flask, request, Response, jsonify
 from flask_restful import reqparse
@@ -38,7 +39,8 @@ class Server():
         self.server_conn, self.engine_conn = Pipe()
         self.engine = EngineThread(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
-
+        self.engine_start = datetime.datetime.now()
+        self.engine_stopped = None
         # STORAGE QUEUE, WORKER AND INTERFACE
         self.storage_queue = Queue()
         self.storage_worker = StorageWorker(self.storage_queue, storage_config, config['storage_type'])
@@ -214,7 +216,17 @@ def retrieve_templates(amount):
 
 def engine_status():
     status = srv.engine.is_alive()
-    return str(status)
+    if status is True:
+        started = srv.engine_start
+        stopped = None
+        delta_t = datetime.datetime.now() - srv.engine_start
+        delta_text = "time_running"
+    else:
+        started = None
+        stopped = srv.engine_stopped
+        delta_t = datetime.datetime.now() - srv.engine_stopped
+        delta_text = "time_stopped"
+    return jsonify({"running": status, "started": started, "stopped": stopped, delta_text: {"days": delta_t.days, "seconds": delta_t.seconds}})
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
