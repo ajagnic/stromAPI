@@ -46,6 +46,7 @@ class Server():
 
         # NOTE TODO MAKE MORE FLEXIBLE?
         self.storage_interface = SqliteInterface(storage_config['local']['args'][0])
+        self.storage_interface.seed_template_table()
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
@@ -127,28 +128,6 @@ def index():
     resp.headers['Access-Control-Allow-Origin']='*'
     return resp
 
-# def get(this):
-#     """ Returns data, specified by endpoint & URL params.
-#     Expects multiple url arguments: range or time, and token.
-#     """
-#     tk['get'].start()
-#     time_range = request.args.get('range', '')
-#     time = request.args.get('time', '')
-#     token = request.args.get('token', '')
-#     if time_range:
-#         logger.debug("get: got time_range")
-#         if time_range == 'ALL':
-#             logger.debug("get: time_range is ALL")
-#             tk['get : coordinator.get_events'].start()
-#             result = srv.coordinator.get_events(token)
-#             tk['get : coordinator.get_events'].stop()
-#             logger.debug("get: coordinator.get_events done")
-#             tk['get'].stop()
-#             return ("\n" + str(result) + "\n"), 200
-#         else:
-#             return '', 403
-#     elif time:
-#         pass
 
 # TODO NEW, STOPWATCH REM'D FOR CLARITY
 # TODO FLESH OUT FUNC, NEED COORD METHODS?
@@ -158,20 +137,25 @@ def get(this):
     token = request.args.get('token', '')# stream_token
     if this in ["events", "raw", "filtered", "derived"]:
         if this == "raw":
-            pass
+            if time_range:
+                if str(time_range).lower() == 'all':
+                    pass
+                    #return srv.storage_interface.retrieve_data(token, ["*"], {})
+            elif time:
+                pass
         elif this == "filtered":
             pass
         elif this == "derived":
             pass
-        else:# events
-            if time_range:
-                if str(time_range).lower() == 'all':
-                    result = srv.coordinator.get_events(token)
-                    return result, 200
-                else:
-                    pass
-            elif time:
-                pass
+        # else:# events
+            # if time_range:
+            #     if str(time_range).lower() == 'all':
+            #         result = srv.coordinator.get_events(token)
+            #         return result, 200
+            #     else:
+            #         pass
+            # elif time:
+            #     pass
     else:
         return "Value Error", 403
 
@@ -205,7 +189,7 @@ def data_storage():
 
     logger.debug("putting DataFrame in queue")
     # error handling
-    srv.storage_queue.put('bstream', parsed[0], parsed[1])
+    srv.storage_queue.put(('bstream', parsed[0], parsed[1]))
     logger.debug("Finished queuing")
 
     return 'ok'
@@ -222,18 +206,18 @@ def template_storage():
 
     return 'ok'
 
-def retrieve_templates(amount):
+def retrieve_templates(which):
     template_id = request.args.get("template_id", "")
     stream_token = request.args.get("stream_token", "")
-    amount = str(amount).lower()
-    if amount == "all":
+    which = str(which).lower()
+    if which == "all":
         if template_id:
             return srv.storage_interface.retrieve_template_by_id(template_id)
         elif stream_token:
             return srv.storage_interface.retrieve_all_by_token(stream_token)
         else:
             return srv.storage_interface.retrieve_all_templates()
-    elif amount == "latest" or amount == "current":
+    elif which == "latest" or which == "current":
         if template_id:
             return srv.storage_interface.retrieve_current_by_id(template_id)
         elif stream_token:
@@ -251,7 +235,7 @@ app.add_url_rule('/template_storage', 'template_storage', template_storage, meth
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
-app.add_url_rule('/api/retrieve/<amount>', 'retrieve_templates', retrieve_templates, methods=['GET'])
+app.add_url_rule('/api/retrieve/<which>', 'retrieve_templates', retrieve_templates, methods=['GET'])
 
 
 def start():
