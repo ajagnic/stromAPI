@@ -132,35 +132,6 @@ def index():
     return resp
 
 
-# # TODO NEW, STOPWATCH REM'D FOR CLARITY
-# def get(this):
-#     time_range = request.args.get('range', '')# timestamp range
-#     time = request.args.get('time', '')# single timestamp
-#     token = request.args.get('token', '')# stream_token
-#     if this in ["events", "raw", "filtered", "derived"]:
-#         if this == "raw":
-#             if time_range:
-#                 if str(time_range).lower() == 'all':
-#                     pass
-#                     #return srv.storage_interface.retrieve_data(token, ["*"], {})
-#             elif time:
-#                 pass
-#         elif this == "filtered":
-#             pass
-#         elif this == "derived":
-#             pass
-#         # else:# events
-#             # if time_range:
-#             #     if str(time_range).lower() == 'all':
-#             #         result = srv.coordinator.get_events(token)
-#             #         return result, 200
-#             #     else:
-#             #         pass
-#             # elif time:
-#             #     pass
-#     else:
-#         return "Value Error", 403
-
 def get(this):
     token = request.args.get("token", "")
     if this == "all":
