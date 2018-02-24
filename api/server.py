@@ -46,7 +46,10 @@ class Server():
 
         # NOTE TODO MAKE MORE FLEXIBLE?
         self.storage_interface = SqliteInterface(storage_config['local']['args'][0])
-        self.storage_interface.seed_template_table()
+        try:
+            self.storage_interface.seed_template_table()
+        except:
+            pass
 
     def _dstream_new(self):
         tk['Server._dstream_new'].start()
@@ -129,35 +132,43 @@ def index():
     return resp
 
 
-# TODO NEW, STOPWATCH REM'D FOR CLARITY
-# TODO FLESH OUT FUNC, NEED COORD METHODS?
+# # TODO NEW, STOPWATCH REM'D FOR CLARITY
+# def get(this):
+#     time_range = request.args.get('range', '')# timestamp range
+#     time = request.args.get('time', '')# single timestamp
+#     token = request.args.get('token', '')# stream_token
+#     if this in ["events", "raw", "filtered", "derived"]:
+#         if this == "raw":
+#             if time_range:
+#                 if str(time_range).lower() == 'all':
+#                     pass
+#                     #return srv.storage_interface.retrieve_data(token, ["*"], {})
+#             elif time:
+#                 pass
+#         elif this == "filtered":
+#             pass
+#         elif this == "derived":
+#             pass
+#         # else:# events
+#             # if time_range:
+#             #     if str(time_range).lower() == 'all':
+#             #         result = srv.coordinator.get_events(token)
+#             #         return result, 200
+#             #     else:
+#             #         pass
+#             # elif time:
+#             #     pass
+#     else:
+#         return "Value Error", 403
+
 def get(this):
-    time_range = request.args.get('range', '')# timestamp range
-    time = request.args.get('time', '')# single timestamp
-    token = request.args.get('token', '')# stream_token
-    if this in ["events", "raw", "filtered", "derived"]:
-        if this == "raw":
-            if time_range:
-                if str(time_range).lower() == 'all':
-                    pass
-                    #return srv.storage_interface.retrieve_data(token, ["*"], {})
-            elif time:
-                pass
-        elif this == "filtered":
-            pass
-        elif this == "derived":
-            pass
-        # else:# events
-            # if time_range:
-            #     if str(time_range).lower() == 'all':
-            #         result = srv.coordinator.get_events(token)
-            #         return result, 200
-            #     else:
-            #         pass
-            # elif time:
-            #     pass
+    token = request.args.get("token", "")
+    if this == "all":
+        res = srv.storage_interface.retrieve_data(token, "*")
+        return res.to_json()#TODO better format w/ params?
     else:
-        return "Value Error", 403
+        res = srv.storage_interface.retrieve_data(token, this)
+        return res.to_json()
 
 
 def handle_event_detection():
