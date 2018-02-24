@@ -134,6 +134,8 @@ def index():
 
 def get(this):
     token = request.args.get("token", "")
+    time = None
+    time_range = None
     if this == "all":
         res = srv.storage_interface.retrieve_data(token, "*")
         return res.to_json()#TODO better format w/ params?
