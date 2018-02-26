@@ -108,6 +108,9 @@ def load():
     """
     args = srv.parse()
     data = args['data'] #   data with token
+    # with open("demo_data/demo_data_new.txt", "w") as doc:
+    #     doc.write(data)
+    # doc.close()
     try:
         unjson_data = json.loads(data)
         logger.debug("load: json.loads done")
@@ -126,6 +129,7 @@ def load():
          resp.headers['Access-Control-Allow-Origin']='*'
          return resp
 
+
 def index():
     resp = Response('STROM-API is UP', 200)
     resp.headers['Access-Control-Allow-Origin']='*'
@@ -137,10 +141,10 @@ def get(this):
     time_range = request.args.get("range", "")# kwargs containing 'start_ts' and 'end_ts'
     if this == "all":
         res = srv.storage_interface.retrieve_data(token, "*", time_range)
-        return res.to_json()#TODO better format w/ params?
+        return res.to_json(), 200#TODO better format w/ params?
     else:
         res = srv.storage_interface.retrieve_data(token, this, time_range)
-        return res.to_json()
+        return res.to_json(), 200
 
 
 def handle_event_detection():
