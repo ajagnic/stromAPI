@@ -134,18 +134,12 @@ def index():
 
 def get(this):
     token = request.args.get("token", "")
-    time_range = request.args.get("", "")# kwargs containing 'start_ts' and 'end_ts'
+    time_range = request.args.get("range", "")# kwargs containing 'start_ts' and 'end_ts'
     if this == "all":
-        if time_range:
-            res = srv.storage_interface.retrieve_data(token, "*", time_range)
-        else:
-            res = srv.storage_interface.retrieve_data(token, "*")
+        res = srv.storage_interface.retrieve_data(token, "*", time_range)
         return res.to_json()#TODO better format w/ params?
     else:
-        if time_range:
-            res = srv.storage_interface.retrieve_data(token, this, time_range)
-        else:
-            res = srv.storage_interface.retrieve_data(token, this)
+        res = srv.storage_interface.retrieve_data(token, this, time_range)
         return res.to_json()
 
 
