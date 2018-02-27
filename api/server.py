@@ -140,10 +140,11 @@ def get(this):
     token = request.args.get("token", "")
     time_range = request.args.get("range", "")# kwargs containing 'start_ts' and 'end_ts'
     if this == "all":
-        res = srv.storage_interface.retrieve_data(token, "*", time_range)
+        res = srv.storage_interface.retrieve_data(token, "*")# TODO figure out passing kwargs
+        print(res)
         return res.to_json(), 200#TODO better format w/ params?
     else:
-        res = srv.storage_interface.retrieve_data(token, this, time_range)
+        res = srv.storage_interface.retrieve_data(token, this)
         return res.to_json(), 200
 
 
@@ -211,6 +212,7 @@ def retrieve_templates(which):
             return srv.storage_interface.retrieve_current_template(stream_token)
     else:
         return "Value Error", 403
+
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])

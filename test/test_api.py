@@ -44,23 +44,23 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    def test_load(self):
-        if self.server_up:
-            df = open(self.dir + "demo_trip26.txt", 'r')
-            data = df.read()
-            tf = open(self.dir + "demo_template.txt", 'r')
-            tmpl = tf.read()
-            ret = requests.post(self.url + '/api/define', data={'template': tmpl})
-            json_data = json.loads(data)
-            for obj in json_data:
-                obj['stream_token'] = ret.text
-            json_dump = json.dumps(json_data)
-            ret = requests.post(self.url + '/api/load', data={'data': json_dump})
-            df.close()
-            tf.close()
-            self.assertEqual(ret.status_code, 202)
-        else:
-            self.fail("!! SERVER NOT FOUND !!")
+    # def test_load(self):
+    #     if self.server_up:
+    #         df = open(self.dir + "demo_trip26.txt", 'r')
+    #         data = df.read()
+    #         tf = open(self.dir + "demo_template.txt", 'r')
+    #         tmpl = tf.read()
+    #         ret = requests.post(self.url + '/api/define', data={'template': tmpl})
+    #         json_data = json.loads(data)
+    #         for obj in json_data:
+    #             obj['stream_token'] = ret.text
+    #         json_dump = json.dumps(json_data)
+    #         ret = requests.post(self.url + '/api/load', data={'data': json_dump})
+    #         df.close()
+    #         tf.close()
+    #         self.assertEqual(ret.status_code, 202)
+    #     else:DRIANthe
+    #         self.fail("!! SERVER NOT FOUND !!")
 
     def test_load_format_fail(self):
         if self.server_up:
@@ -92,7 +92,6 @@ class TestServer(unittest.TestCase):
             for obj in json_data:
                 obj['stream_token'] = define_r.text
                 obj['stream_name'] = "Parham"
-                obj['template_id'] = tmpl
             json_dump = json.dumps(json_data)
             load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
             time.sleep(2)
