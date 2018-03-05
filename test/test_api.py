@@ -44,23 +44,24 @@ class TestServer(unittest.TestCase):
         else:
             self.fail("!! SERVER NOT FOUND !!")
 
-    # def test_load(self):
-    #     if self.server_up:
-    #         df = open(self.dir + "demo_trip26.txt", 'r')
-    #         data = df.read()
-    #         tf = open(self.dir + "demo_template.txt", 'r')
-    #         tmpl = tf.read()
-    #         ret = requests.post(self.url + '/api/define', data={'template': tmpl})
-    #         json_data = json.loads(data)
-    #         for obj in json_data:
-    #             obj['stream_token'] = ret.text
-    #         json_dump = json.dumps(json_data)
-    #         ret = requests.post(self.url + '/api/load', data={'data': json_dump})
-    #         df.close()
-    #         tf.close()
-    #         self.assertEqual(ret.status_code, 202)
-    #     else:DRIANthe
-    #         self.fail("!! SERVER NOT FOUND !!")
+    def test_load(self):
+        if self.server_up:
+            df = open(self.dir + "demo_trip26.txt", 'r')
+            data = df.read()
+            tf = open(self.dir + "demo_template.txt", 'r')
+            tmpl = tf.read()
+            ret = requests.post(self.url + '/api/define', data={'template': tmpl})
+            json_data = json.loads(data)
+            for obj in json_data:
+                obj['stream_token'] = ret.text
+            json_dump = json.dumps(json_data)
+            ret = requests.post(self.url + '/api/load', data={'data': json_dump})
+            df.close()
+            tf.close()
+            self.assertEqual(ret.status_code, 202)
+            time.sleep(3)
+        else:
+            self.fail("!! SERVER NOT FOUND !!")
 
     def test_load_format_fail(self):
         if self.server_up:
@@ -83,8 +84,9 @@ class TestServer(unittest.TestCase):
         if self.server_up:
             tf = open(self.dir + "demo_template_new_new.txt", 'r')
             tmpl = tf.read()
+            ujtmpl = json.loads(tmpl)
             tf.close()
-            define_r = requests.post(self.url + '/api/define', data={'template': tmpl})
+            define_r = requests.post(self.url + '/api/define', data={'template': ujtmpl})
             df = open(self.dir + "demo_data_new.txt", 'r')
             data = df.read()
             df.close()
@@ -95,8 +97,10 @@ class TestServer(unittest.TestCase):
             json_dump = json.dumps(json_data)
             load_r = requests.post(self.url + '/api/load', data={'data': json_dump})
             time.sleep(2)
+            print(define_r.text)
             get_r = requests.get(self.url + '/api/get/all?token=' + define_r.text)
             self.assertEqual(get_r.status_code, 200)
+            time.sleep(3)
             # self.assertGreater(len(get_r.text), 3)
         else:
             self.fail("!! SERVER NOT FOUND !!")
