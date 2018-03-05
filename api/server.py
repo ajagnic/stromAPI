@@ -1,4 +1,5 @@
 """ Flask server for coordination of processes: device registration, ingestion/processing of data, and retrieval of found events. """
+import datetime
 import json
 import pickle
 from multiprocessing import Pipe
@@ -10,13 +11,12 @@ from flask_socketio import SocketIO
 
 from strom.coordinator.coordinator import Coordinator
 from strom.dstream.dstream import DStream
-from strom.engine.engine import EngineThread
+from strom.engine.engine import Engine
+from strom.storage.sqlite_interface import SqliteInterface
 from strom.storage.storage_worker import StorageWorker, storage_config
 from strom.utils.configer import configer as config
 from strom.utils.logger.logger import logger
 from strom.utils.stopwatch import stopwatch as tk
-
-from strom.storage.sqlite_interface import SqliteInterface
 
 __version__ = '0.1.0'
 __author__ = 'Adrian Agnic <adrian@tura.io>'
@@ -36,9 +36,10 @@ class Server():
 
         # ENGINE
         self.server_conn, self.engine_conn = Pipe()
-        self.engine = EngineThread(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
+        self.engine = Engine(self.engine_conn, buffer_max_batch=10, buffer_max_seconds=1)
         self.engine.start()# NOTE  POSSIBLE ISSUE WHEN MODIFYING BUFFER PROPS FROM TEST
-
+        self.engine_start = datetime.datetime.now()
+        self.engine_stopped = None
         # STORAGE QUEUE, WORKER AND INTERFACE
         self.storage_queue = Queue()
         self.storage_worker = StorageWorker(self.storage_queue, storage_config, config['storage_type'])
@@ -74,7 +75,6 @@ def define():
     Expects 'template' argument containing user-formatted template.
     """
     tk['define'].start()
-    print("HERWE")
     args = srv.parse()
     template = args['template'] #   dstream template
     cur_dstream = srv._dstream_new()
@@ -85,7 +85,6 @@ def define():
         logger.debug("define: json.loads done")
         cur_dstream.load_from_json(json_template)
         logger.debug("define: dstream.load_from_json done")
-        print("ABOUT TO GO")
         template_df = srv.coordinator.process_template(cur_dstream)
         srv.storage_queue.put(('template', template_df))
         logger.debug("define: coordinator.process-template done")
@@ -214,6 +213,28 @@ def retrieve_templates(which):
         return "Value Error", 403
 
 
+def engine_status():
+    status = srv.engine.is_alive()
+    if status is True:
+        started = srv.engine_start
+        stopped = None
+        delta_t = datetime.datetime.now() - srv.engine_start
+        delta_text = "time_running"
+    else:
+        started = None
+        stopped = srv.engine_stopped
+        delta_t = datetime.datetime.now() - srv.engine_stopped
+        delta_text = "time_stopped"
+    return jsonify({"running": status, "started": started, "stopped": stopped, delta_text: {"days": delta_t.days, "seconds": delta_t.seconds}})
+
+def stop_engine():
+    srv.server_conn.send("stop_poison_pill")
+    while srv.engine.is_alive():
+        pass
+    srv.engine_stopped = datetime.datetime.now()
+    return jsonify({"engine_stopped": True, "time": srv.engine_stopped})
+
+
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
 app.add_url_rule('/api/load', 'load', load, methods=['POST'])
@@ -223,6 +244,8 @@ app.add_url_rule('/template_storage', 'template_storage', template_storage, meth
 
 # GET
 app.add_url_rule('/', 'index', index, methods=['GET'])
+app.add_url_rule('/api/engine_status', 'engine_status', engine_status, methods=['GET'])
+app.add_url_rule('/api/stop_engine', 'stop_engine', stop_engine, methods=['GET'])
 app.add_url_rule('/api/get/<this>', 'get', get, methods=['GET'])
 app.add_url_rule('/api/retrieve/<which>', 'retrieve_templates', retrieve_templates, methods=['GET'])
 
