@@ -84,6 +84,8 @@ def define():
         json_template = json.loads(template)
         logger.debug("define: json.loads done")
         cur_dstream.load_from_json(json_template)
+        # sends template to engine to init buffer stuff + data puller, if applicable
+        srv.server_conn.send(cur_dstream, "new")
         logger.debug("define: dstream.load_from_json done")
         template_df = srv.coordinator.process_template(cur_dstream)
         srv.storage_queue.put(('template', template_df))
@@ -115,7 +117,7 @@ def load():
             srv.server_conn.send(unjson_data)# NOTE CHECK DATA FORMATS COMPARED TO LOAD_KAFKA
         elif type(unjson_data) is list:
             for d in unjson_data:
-                srv.server_conn.send(d)
+                srv.server_conn.send(d, "load")
         logger.debug("load: data piped to engine buffer")
     except Exception as ex:
         logger.warning("Server Error in load: Data loading/processing - {}".format(ex))
