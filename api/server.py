@@ -109,6 +109,9 @@ def load():
     """
     args = srv.parse()
     data = args['data'] #   data with token
+    # with open("demo_data/demo_data_new.txt", "w") as doc:
+    #     doc.write(data)
+    # doc.close()
     try:
         unjson_data = json.loads(data)
         logger.debug("load: json.loads done")
@@ -127,6 +130,7 @@ def load():
          resp.headers['Access-Control-Allow-Origin']='*'
          return resp
 
+
 def index():
     resp = Response('STROM-API is UP', 200)
     resp.headers['Access-Control-Allow-Origin']='*'
@@ -135,14 +139,14 @@ def index():
 
 def get(this):
     token = request.args.get("token", "")
-    time = None
-    time_range = None
+    time_range = request.args.get("range", "")# kwargs containing 'start_ts' and 'end_ts'
     if this == "all":
-        res = srv.storage_interface.retrieve_data(token, "*")
-        return res.to_json()#TODO better format w/ params?
+        res = srv.storage_interface.retrieve_data(token, "*")# TODO figure out passing kwargs
+        print(res)
+        return res.to_json(), 200#TODO better format w/ params?
     else:
         res = srv.storage_interface.retrieve_data(token, this)
-        return res.to_json()
+        return res.to_json(), 200
 
 
 def handle_event_detection():
@@ -210,6 +214,7 @@ def retrieve_templates(which):
     else:
         return "Value Error", 403
 
+
 def engine_status():
     status = srv.engine.is_alive()
     if status is True:
@@ -230,6 +235,7 @@ def stop_engine():
         pass
     srv.engine_stopped = datetime.datetime.now()
     return jsonify({"engine_stopped": True, "time": srv.engine_stopped})
+
 
 # POST
 app.add_url_rule('/api/define', 'define', define, methods=['POST'])
