@@ -85,7 +85,7 @@ def define():
         logger.debug("define: json.loads done")
         cur_dstream.load_from_json(json_template)
         # sends template to engine to init buffer stuff + data puller, if applicable
-        srv.server_conn.send(cur_dstream, "new")
+        srv.server_conn.send((cur_dstream, "new"))
         logger.debug("define: dstream.load_from_json done")
         template_df = srv.coordinator.process_template(cur_dstream)
         srv.storage_queue.put(('template', template_df))
