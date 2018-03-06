@@ -190,7 +190,7 @@ def template_storage():
     parsed = pickle.loads(d)
     # error handling
     logger.debug("putting template in queue")
-    srv.storage_queue.put('template', parsed)
+    srv.storage_queue.put(('template', parsed))
     logger.debug("Finished queuing")
 
     return 'ok'
