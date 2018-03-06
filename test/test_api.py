@@ -1,7 +1,8 @@
-import unittest
-import requests
 import json
 import time
+import unittest
+
+import requests
 
 
 class TestServer(unittest.TestCase):
@@ -46,9 +47,9 @@ class TestServer(unittest.TestCase):
 
     def test_load(self):
         if self.server_up:
-            df = open(self.dir + "demo_trip26.txt", 'r')
+            df = open(self.dir + "demo_data_new.txt", 'r')
             data = df.read()
-            tf = open(self.dir + "demo_template.txt", 'r')
+            tf = open(self.dir + "demo_template_new_new.txt", 'r')
             tmpl = tf.read()
             ret = requests.post(self.url + '/api/define', data={'template': tmpl})
             json_data = json.loads(data)
