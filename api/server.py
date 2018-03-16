@@ -98,6 +98,7 @@ def define():
         # return bad_resp
         return '{}'.format(ex), 400
     else:
+        print(f"Created template for stream {cur_dstream['stream_token']}")
         resp = Response(str(cur_dstream['stream_token']), 200)
         resp.headers['Access-Control-Allow-Origin']='*'
         tk['define'].stop()
