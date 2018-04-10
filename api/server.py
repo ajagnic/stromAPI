@@ -202,16 +202,16 @@ def retrieve_templates(which):
     which = str(which).lower()
     if which == "all":
         if template_id:
-            return srv.storage_interface.retrieve_template_by_id(template_id)
+            return srv.storage_interface.retrieve_template_by_id(template_id).to_json()
         elif stream_token:
-            return srv.storage_interface.retrieve_all_by_token(stream_token)
+            return srv.storage_interface.retrieve_all_by_token(stream_token).to_json()
         else:
-            return srv.storage_interface.retrieve_all_templates()
+            return srv.storage_interface.retrieve_all_templates().to_json()
     elif which == "latest" or which == "current":
         if template_id:
-            return srv.storage_interface.retrieve_current_by_id(template_id)
+            return srv.storage_interface.retrieve_current_by_id(template_id).to_json()
         elif stream_token:
-            return srv.storage_interface.retrieve_current_template(stream_token)
+            return srv.storage_interface.retrieve_current_template(stream_token).to_json()
     else:
         return "Value Error", 403
 
